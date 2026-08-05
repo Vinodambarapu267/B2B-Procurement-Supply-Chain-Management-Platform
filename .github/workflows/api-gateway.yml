@@ -1,0 +1,22 @@
+name: API Gateway CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "api-gateway/**"
+      - "commons/**"
+
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "api-gateway/**"
+      - "commons/**"
+
+jobs:
+  build:
+    uses: ./.github/workflows/reusable-service-ci.yml
+    with:
+      service-name: api-gateway
+      service-path: api-gateway
+      java-version: "21"
