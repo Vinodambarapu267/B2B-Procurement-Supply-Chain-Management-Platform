@@ -1,0 +1,22 @@
+name: Inventory Service CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "inventory-service/**"
+      - "commons/**"
+
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "inventory-service/**"
+      - "commons/**"
+
+jobs:
+  build:
+    uses: ./.github/workflows/reusable-service-ci.yml
+    with:
+      service-name: inventory-service
+      service-path: inventory-service
+      java-version: "21"
