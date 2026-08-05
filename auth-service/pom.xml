@@ -93,10 +93,6 @@
 			<optional>true</optional>
 		</dependency>
 
-		<!-- Testing: only real, published test artifacts.
-		     spring-boot-starter-test already brings JUnit 5, Mockito,
-		     AssertJ and Spring Test - no need for per-starter "-test"
-		     variants, they don't exist on Maven Central. -->
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
