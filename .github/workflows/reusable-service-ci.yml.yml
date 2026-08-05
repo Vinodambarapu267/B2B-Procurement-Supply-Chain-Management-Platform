@@ -1,0 +1,57 @@
+name: Reusable Service CI
+
+on:
+  workflow_call:
+    inputs:
+      service-name:
+        description: Service Name
+        required: true
+        type: string
+
+      service-path:
+        description: Path of the microservice
+        required: true
+        type: string
+
+      java-version:
+        description: Java Version
+        required: false
+        type: string
+        default: "21"
+
+jobs:
+  build:
+    name: Build ${{ inputs.service-name }}
+
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ${{ inputs.service-path }}
+
+    steps:
+      - name: Checkout Repository
+        uses: actions/checkout@v4
+
+      - name: Setup Java
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: ${{ inputs.java-version }}
+          cache: maven
+
+      - name: Verify Maven
+        run: mvn --version
+
+      - name: Compile Project
+        run: mvn clean compile
+
+      - name: Build Project
+        run: mvn clean package -DskipTests
+
+      - name: Upload Build Artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: ${{ inputs.service-name }}-jar
+          path: ${{ inputs.service-path }}/target/*.jar
+          retention-days: 7
