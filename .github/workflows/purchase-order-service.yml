@@ -1,0 +1,22 @@
+name: Purchase Order Service CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "purchase-order-service/**"
+      - "commons/**"
+
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "purchase-order-service/**"
+      - "commons/**"
+
+jobs:
+  build:
+    uses: ./.github/workflows/reusable-service-ci.yml
+    with:
+      service-name: purchase-order-service
+      service-path: purchase-order-service
+      java-version: "21"
