@@ -2,6 +2,8 @@ package com.example.demo.service;
 import java.security.Key;
 import java.util.Date;
 
+import javax.crypto.SecretKey;
+
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
@@ -21,11 +23,10 @@ public class JwtUtil {
 	    public void setSecret(String secret) {
 	        SECRET = secret;
 	    }
-	private Key getSignKey() {
-        byte[] keyBytes = Decoders.BASE64.decode(SECRET);
-        return Keys.hmacShaKeyFor(keyBytes);
-    }
-
+	 private SecretKey getSignKey() {
+		    byte[] keyBytes = Decoders.BASE64.decode(SECRET);
+		    return Keys.hmacShaKeyFor(keyBytes);
+		}
     public String generateToken(String username, Roles roles) {
         return Jwts.builder()
                 .setSubject(username)
@@ -48,7 +49,11 @@ public class JwtUtil {
     }
 
     private Claims extractAllClaims(String token) {
-        return Jwts.parserBuilder().setSigningKey(getSignKey()).build().parseClaimsJws(token).getBody();
+        return Jwts.parser()
+                .verifyWith(getSignKey())
+                .build()
+                .parseSignedClaims(token)
+                .getPayload();
     }
 
     public boolean validateToken(String token) {
