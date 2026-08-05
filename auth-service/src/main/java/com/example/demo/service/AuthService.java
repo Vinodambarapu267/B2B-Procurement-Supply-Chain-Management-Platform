@@ -32,10 +32,11 @@ public class AuthService {
 		return jwtUtil.generateToken(username, role);
 	}
 
-	public void validateToken(String token) {
+	public String validateToken(String token) {
 		if (!jwtUtil.validateToken(token)) {
-			throw new RuntimeException("Token is invalid or expired");
+			return "Token is invalid or expired";
 		}
+		return "valid token";
 	}
 
 	public String login(String email, String password) {
