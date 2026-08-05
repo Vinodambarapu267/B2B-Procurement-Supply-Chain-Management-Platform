@@ -34,9 +34,9 @@ public class AuthService {
 
 	public String validateToken(String token) {
 		if (!jwtUtil.validateToken(token)) {
-			return "Token is invalid or expired";
+			throw new RuntimeException("Token is invalid or expired");
 		}
-		return "valid token";
+		return jwtUtil.validateToken(token)? "valid token":"invalid token";
 	}
 
 	public String login(String email, String password) {
