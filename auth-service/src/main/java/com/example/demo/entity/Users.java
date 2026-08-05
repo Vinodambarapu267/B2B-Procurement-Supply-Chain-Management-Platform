@@ -8,6 +8,9 @@ import org.hibernate.annotations.UpdateTimestamp;
 
 import com.example.demo.utility.Roles;
 
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
+import jakarta.persistence.Id; 
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -16,8 +19,10 @@ import jakarta.persistence.GenerationType;
 import lombok.Data;
 
 @Data
-
+@Entity
+@Table(name = "users")
 public class Users {
+	@Id
 	@GeneratedValue(strategy = GenerationType.SEQUENCE)
 	private UUID id;
 	@Column(nullable = false)
