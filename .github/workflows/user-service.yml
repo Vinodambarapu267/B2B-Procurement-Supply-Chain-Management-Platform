@@ -1,0 +1,22 @@
+name: User Service CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "user-service/**"
+      - "commons/**"
+
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "user-service/**"
+      - "commons/**"
+
+jobs:
+  build:
+    uses: ./.github/workflows/reusable-service-ci.yml
+    with:
+      service-name: user-service
+      service-path: user-service
+      java-version: "21"

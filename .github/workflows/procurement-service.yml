@@ -1,0 +1,22 @@
+name: Procurement Service CI
+
+on:
+  push:
+    branches: [main, develop]
+    paths:
+      - "procurement-service/**"
+      - "commons/**"
+
+  pull_request:
+    branches: [main, develop]
+    paths:
+      - "procurement-service/**"
+      - "commons/**"
+
+jobs:
+  build:
+    uses: ./.github/workflows/reusable-service-ci.yml
+    with:
+      service-name: procurement-service
+      service-path: procurement-service
+      java-version: "21"
