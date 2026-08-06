@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.dto.AuthRequest;
+import com.example.demo.dto.LoginDto;
 import com.example.demo.entity.Users;
 import com.example.demo.repository.UserCredentialRepository;
 import com.example.demo.service.AuthService;
@@ -51,5 +52,10 @@ public class AuthController {
 	@GetMapping("/validate")
 	public String isValidate(@RequestParam String token) {
 		return authService.validateToken(token);
+	}
+
+	@GetMapping("/login")
+	public String loginUser(@RequestBody LoginDto loginDto) {
+		return authService.login(loginDto.getEmail(), loginDto.getPassword());
 	}
 }
