@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.dto.AuthRequest;
 import com.example.demo.dto.LoginDto;
 import com.example.demo.entity.Users;
+import com.example.demo.exceptions.InvalidTokenException;
 import com.example.demo.exceptions.UserNotFoundException;
 import com.example.demo.repository.UserCredentialRepository;
 import com.example.demo.service.AuthService;
@@ -46,7 +47,7 @@ public class AuthController {
 		if (authentication.isAuthenticated()) {
 			return authService.generateToken(authRequest.getUsername(), user.getRole());
 		} else {
-			throw new RuntimeException("invalid access");
+			throw new InvalidTokenException("invalid access");
 		}
 	}
 
