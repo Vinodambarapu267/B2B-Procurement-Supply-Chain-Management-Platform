@@ -5,6 +5,9 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.entity.Users;
+import com.example.demo.exceptions.InvalidPasswordException;
+import com.example.demo.exceptions.InvalidTokenException;
+import com.example.demo.exceptions.UserNotFoundException;
 import com.example.demo.repository.UserCredentialRepository;
 import com.example.demo.utility.Roles;
 
@@ -34,15 +37,15 @@ public class AuthService {
 
 	public String validateToken(String token) {
 		if (!jwtUtil.validateToken(token)) {
-			throw new RuntimeException("Token is invalid or expired");
+			throw new InvalidTokenException("Token is invalid or expired");
 		}
 		return jwtUtil.validateToken(token)? "valid token":"invalid token";
 	}
 
 	public String login(String email, String password) {
-		Users user = repository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
+		Users user = repository.findByEmail(email).orElseThrow(()-> new UserNotFoundException("User not Found"));
 		if (!passwordEncoder.matches(password, user.getPassword())) {
-			throw new RuntimeException("Invalid password");
+			throw new InvalidPasswordException("Invalid password");
 		}
 		String token = jwtUtil.generateToken(user.getUsername(), user.getRole());
 
