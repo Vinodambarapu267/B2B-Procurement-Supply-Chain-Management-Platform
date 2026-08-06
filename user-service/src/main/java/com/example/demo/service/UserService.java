@@ -1,6 +1,6 @@
 package com.example.demo.service;
 
-import java.util.Optional;
+import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
@@ -11,9 +11,9 @@ import com.example.demo.entity.UserProfiles;
 public interface UserService {
 	UserProfiles createUser(UserProfiles user);
 
-	Optional<UserProfiles> updateUser(UserProfileDto profileDto);
+	UserProfiles updateUser(UUID id, UserProfileDto profileDto);
 
-	Optional<UserProfiles> updateUserRole(Long id);
+	UserProfiles updateUserRole(Long id);
 
 	String updateStatus(Long id);
 
