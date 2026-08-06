@@ -1,8 +1,10 @@
 package com.example.demo.serviceimpl;
 
-import java.util.Optional;
+import java.util.UUID;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.dto.UserProfileDto;
 import com.example.demo.entity.UserProfiles;
@@ -32,15 +34,26 @@ public class UserServiceimpl implements UserService {
 	}
 
 	@Override
-	public Optional<UserProfiles> updateUser(UserProfileDto profileDto) {
-		// TODO Auto-generated method stub
-		return Optional.empty();
+	@Transactional
+	public UserProfiles updateUser(UUID id, UserProfileDto profileDto) {
+		UserProfiles existedUser = repository.findById(id).orElseThrow(() -> new RuntimeException("User not Found"));
+		existedUser.setName(profileDto.getName());
+		existedUser.setDepartment(profileDto.getDepartment());
+		existedUser.setJobTitle(profileDto.getJobTitle());
+		existedUser.setRole(profileDto.getRole());
+		if (profileDto.getManager() != null) {
+			UserProfiles mananger = repository.findById(profileDto.getManager())
+					.orElseThrow(() -> new RuntimeException("Manager Not found"));
+			existedUser.setManager(mananger);
+		}
+		existedUser.setIsActive(profileDto.getIsActive());
+		return repository.save(existedUser);
 	}
 
 	@Override
-	public Optional<UserProfiles> updateUserRole(Long id) {
+	public UserProfiles updateUserRole(Long id) {
 		// TODO Auto-generated method stub
-		return Optional.empty();
+		return null;
 	}
 
 	@Override
