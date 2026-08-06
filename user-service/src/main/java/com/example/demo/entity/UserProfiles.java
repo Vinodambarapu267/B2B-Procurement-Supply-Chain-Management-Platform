@@ -6,8 +6,12 @@ import java.util.UUID;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
+import com.example.demo.repository.utility.Roles;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -29,6 +33,8 @@ public class UserProfiles {
 	private String department;
 	@Column(length = 150)
 	private String jobTitle;
+	@Enumerated(EnumType.STRING)
+	private Roles role;
 	@ManyToOne
 	@JoinColumn(name = "manager_id")
 	private UserProfiles manager;
