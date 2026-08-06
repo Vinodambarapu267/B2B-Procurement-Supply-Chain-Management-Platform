@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.demo.dto.AuthRequest;
 import com.example.demo.dto.LoginDto;
 import com.example.demo.entity.Users;
+import com.example.demo.exceptions.UserNotFoundException;
 import com.example.demo.repository.UserCredentialRepository;
 import com.example.demo.service.AuthService;
 
@@ -39,7 +40,7 @@ public class AuthController {
 		Authentication authentication = authenticationManager.authenticate(
 				new UsernamePasswordAuthenticationToken(authRequest.getUsername(), authRequest.getPassword()));
 		Users user = credentialRepository.findByUsername(authentication.getName())
-				.orElseThrow(() -> new RuntimeException("User not Found"));
+				.orElseThrow(() -> new UserNotFoundException("User not Found"));
 		String token = authService.generateToken(user.getUsername(), user.getRole());
 		System.out.println("Matches     : " + passwordEncoder.matches(authRequest.getPassword(), user.getPassword()));
 		if (authentication.isAuthenticated()) {
