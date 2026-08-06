@@ -9,5 +9,5 @@ import com.example.demo.entity.UserProfiles;
 import com.example.demo.repository.utility.Roles;
 
 public interface UserProfilesRepository extends JpaRepository<UserProfiles, UUID> {
-	Optional<UserProfiles> findByName(String name, Roles role);
+	Optional<UserProfiles> findByNameAndRole(String name, Roles role);
 }
