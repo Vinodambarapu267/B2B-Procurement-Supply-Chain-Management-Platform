@@ -2,11 +2,15 @@ package com.example.demo.dto;
 
 import java.util.UUID;
 
+import com.example.demo.entity.UserProfiles;
 import com.example.demo.repository.utility.Roles;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -23,7 +27,9 @@ public class UserProfileDto {
 	private String jobTitle;
 	@Enumerated(EnumType.STRING)
 	private Roles role;
-	private UUID manager;
+	@ManyToOne(fetch = FetchType.LAZY)
+	@JoinColumn(name = "manager_id")
+	private UserProfiles manager;
 	private Boolean isActive;
 
 }
