@@ -71,6 +71,13 @@ public class UserServiceimpl implements UserService {
 	}
 
 	@Override
+	public UserProfiles findByName(String name) {
+		UserProfiles userProfile = repository.findByName(name)
+				.orElseThrow(() -> new RuntimeException("User not Found "));
+		return userProfile;
+	}
+
+	@Override
 	@Transactional
 	public String deleteUser(String name) {
 		UserProfiles userProfile = repository.findByName(name)

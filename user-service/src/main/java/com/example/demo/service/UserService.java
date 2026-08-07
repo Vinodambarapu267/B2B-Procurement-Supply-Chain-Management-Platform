@@ -13,9 +13,11 @@ public interface UserService {
 
 	UserProfiles updateUser(UUID id, UserProfileDto profileDto);
 
-	UserProfiles updateUserRole(UUID id,String role);
+	UserProfiles updateUserRole(UUID id, String role);
 
 	String updateStatus(UUID id);
 
 	String deleteUser(String name);
+
+	UserProfiles findByName(String name);
 }
