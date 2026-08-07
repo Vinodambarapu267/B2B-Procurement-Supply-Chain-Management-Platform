@@ -10,6 +10,7 @@ import com.example.demo.dto.UserProfileDto;
 import com.example.demo.entity.UserProfiles;
 import com.example.demo.repository.UserProfilesRepository;
 import com.example.demo.service.UserService;
+import com.example.demo.utility.Roles;
 
 import lombok.RequiredArgsConstructor;
 
@@ -51,9 +52,11 @@ public class UserServiceimpl implements UserService {
 	}
 
 	@Override
-	public UserProfiles updateUserRole(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+	@Modifying
+	public UserProfiles updateUserRole(UUID id, String role) {
+		UserProfiles userProfiles = repository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+		userProfiles.setRole(handleUpdateRole(role));
+		return repository.save(userProfiles);
 	}
 
 	@Override
@@ -67,5 +70,20 @@ public class UserServiceimpl implements UserService {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	private Roles handleUpdateRole(String role) {
+	    return switch (role) {
+	        case "EMPLOYEE" -> Roles.EMPLOYEE;
+	        case "ADMIN" -> Roles.ADMIN;
+	        case "MANAGER" -> Roles.MANAGER;
+	        case "FINANCE" -> Roles.FINANCE;
+	        case "PROCUREMENT_OFFICER" -> Roles.PROCUREMENT_OFFICER;
+	        case "WAREHOUSE_MANAGER" -> Roles.WAREHOUSE_MANAGER;
+	        case "SUPPLIER" -> Roles.SUPPLIER;
+	        case "AUDITOR" -> Roles.AUDITOR;
+	        default -> throw new IllegalArgumentException("Please specify the allocated Roles");
+	    };
+	}
+
 
 }
