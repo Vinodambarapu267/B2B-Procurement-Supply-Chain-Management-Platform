@@ -8,6 +8,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.dto.UserProfileDto;
 import com.example.demo.entity.UserProfiles;
+import com.example.demo.exceptions.ManagerNotFoundException;
+import com.example.demo.exceptions.UserAlreadyExistException;
+import com.example.demo.exceptions.UserNotFoundException;
 import com.example.demo.repository.UserProfilesRepository;
 import com.example.demo.service.UserService;
 import com.example.demo.utility.Roles;
@@ -22,7 +25,7 @@ public class UserServiceimpl implements UserService {
 	@Override
 	public UserProfiles createUser(UserProfiles user) {
 		repository.findByNameAndRole(user.getName(), user.getRole()).ifPresent(users -> {
-			throw new RuntimeException("User Already Exist");
+			throw new UserAlreadyExistException("User Already Exist with Name :" + user.getName());
 		});
 		UserProfiles newUser = new UserProfiles();
 		newUser.setName(user.getName());
@@ -37,14 +40,15 @@ public class UserServiceimpl implements UserService {
 	@Override
 	@Transactional
 	public UserProfiles updateUser(UUID id, UserProfileDto profileDto) {
-		UserProfiles existedUser = repository.findById(id).orElseThrow(() -> new RuntimeException("User not Found"));
+		UserProfiles existedUser = repository.findById(id)
+				.orElseThrow(() -> new UserNotFoundException("User not Found" + id));
 		existedUser.setName(profileDto.getName());
 		existedUser.setDepartment(profileDto.getDepartment());
 		existedUser.setJobTitle(profileDto.getJobTitle());
 		existedUser.setRole(profileDto.getRole());
 		if (profileDto.getManager() != null) {
-			UserProfiles mananger = repository.findById(profileDto.getManager())
-					.orElseThrow(() -> new RuntimeException("Manager Not found"));
+			UserProfiles mananger = repository.findById(profileDto.getManager()).orElseThrow(
+					() -> new ManagerNotFoundException("Manager Not found with ID :" + profileDto.getManager()));
 			existedUser.setManager(mananger);
 		}
 		existedUser.setIsActive(profileDto.getIsActive());
@@ -54,14 +58,16 @@ public class UserServiceimpl implements UserService {
 	@Override
 	@Modifying
 	public UserProfiles updateUserRole(UUID id, String role) {
-		UserProfiles userProfiles = repository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+		UserProfiles userProfiles = repository.findById(id)
+				.orElseThrow(() -> new UserNotFoundException("User not found ID : " + id));
 		userProfiles.setRole(handleUpdateRole(role));
 		return repository.save(userProfiles);
 	}
 
 	@Override
 	public String updateStatus(UUID id) {
-		UserProfiles userProfile = repository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+		UserProfiles userProfile = repository.findById(id)
+				.orElseThrow(() -> new UserNotFoundException("User not found with ID : " + id));
 
 		boolean isActive = !userProfile.getIsActive();
 		userProfile.setIsActive(isActive);
@@ -73,7 +79,7 @@ public class UserServiceimpl implements UserService {
 	@Override
 	public UserProfiles findByName(String name) {
 		UserProfiles userProfile = repository.findByName(name)
-				.orElseThrow(() -> new RuntimeException("User not Found "));
+				.orElseThrow(() -> new UserNotFoundException("User not Found with Name : " + name));
 		return userProfile;
 	}
 
@@ -81,7 +87,7 @@ public class UserServiceimpl implements UserService {
 	@Transactional
 	public String deleteUser(String name) {
 		UserProfiles userProfile = repository.findByName(name)
-				.orElseThrow(() -> new RuntimeException("User not Found "));
+				.orElseThrow(() -> new UserNotFoundException("User not Found with Name :" + name));
 		repository.removeManagerReference(userProfile.getId());
 		repository.delete(userProfile);
 		return "deleted successfully";
