@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import java.util.UUID;
 
+import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -41,5 +42,10 @@ public class UserController {
 	@PatchMapping("/{id}/status")
 	public String updateStatus(@PathVariable UUID id) {
 		return userService.updateStatus(id);
+	}
+
+	@DeleteMapping("/deleteUser/{name}")
+	public String deleteUser(@PathVariable String name) {
+		return userService.deleteUser(name);
 	}
 }
