@@ -37,4 +37,9 @@ public class UserController {
 	public UserProfiles updateUserRole(@PathVariable UUID id, @RequestParam String role) {
 		return userService.updateUserRole(id, role);
 	}
+
+	@PatchMapping("/{id}/status")
+	public String updateStatus(@PathVariable UUID id) {
+		return userService.updateStatus(id);
+	}
 }
