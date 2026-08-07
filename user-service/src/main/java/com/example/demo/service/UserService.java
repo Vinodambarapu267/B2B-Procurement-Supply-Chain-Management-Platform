@@ -14,7 +14,7 @@ public interface UserService {
 
 	UserProfiles updateUser(UUID id, UserProfileDto profileDto);
 
-	UserProfiles updateUserRole(UUID id,Roles role);
+	UserProfiles updateUserRole(UUID id,String role);
 
 	String updateStatus(Long id);
 
