@@ -60,9 +60,14 @@ public class UserServiceimpl implements UserService {
 	}
 
 	@Override
-	public String updateStatus(Long id) {
-		// TODO Auto-generated method stub
-		return null;
+	public String updateStatus(UUID id) {
+		UserProfiles userProfile = repository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
+
+	    boolean isActive = !userProfile.getIsActive();
+	    userProfile.setIsActive(isActive);
+
+	    repository.save(userProfile);
+	    return isActive ? "User is Activated" : "User is Deactivated";
 	}
 
 	@Override
