@@ -2,7 +2,7 @@ package com.example.demo.dto;
 
 import java.util.UUID;
 
-import com.example.demo.repository.utility.Roles;
+import com.example.demo.utility.Roles;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.EnumType;
