@@ -6,7 +6,6 @@ import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.UserProfileDto;
 import com.example.demo.entity.UserProfiles;
-import com.example.demo.utility.Roles;
 
 @Service
 public interface UserService {
@@ -16,7 +15,7 @@ public interface UserService {
 
 	UserProfiles updateUserRole(UUID id,String role);
 
-	String updateStatus(Long id);
+	String updateStatus(UUID id);
 
 	String deleteUser(String name);
 }
