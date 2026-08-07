@@ -63,32 +63,35 @@ public class UserServiceimpl implements UserService {
 	public String updateStatus(UUID id) {
 		UserProfiles userProfile = repository.findById(id).orElseThrow(() -> new RuntimeException("User not found"));
 
-	    boolean isActive = !userProfile.getIsActive();
-	    userProfile.setIsActive(isActive);
+		boolean isActive = !userProfile.getIsActive();
+		userProfile.setIsActive(isActive);
 
-	    repository.save(userProfile);
-	    return isActive ? "User is Activated" : "User is Deactivated";
+		repository.save(userProfile);
+		return isActive ? "User is Activated" : "User is Deactivated";
 	}
 
 	@Override
+	@Transactional
 	public String deleteUser(String name) {
-		// TODO Auto-generated method stub
-		return null;
+		UserProfiles userProfile = repository.findByName(name)
+				.orElseThrow(() -> new RuntimeException("User not Found "));
+		repository.removeManagerReference(userProfile.getId());
+		repository.delete(userProfile);
+		return "deleted successfully";
 	}
 
 	private Roles handleUpdateRole(String role) {
-	    return switch (role) {
-	        case "EMPLOYEE" -> Roles.EMPLOYEE;
-	        case "ADMIN" -> Roles.ADMIN;
-	        case "MANAGER" -> Roles.MANAGER;
-	        case "FINANCE" -> Roles.FINANCE;
-	        case "PROCUREMENT_OFFICER" -> Roles.PROCUREMENT_OFFICER;
-	        case "WAREHOUSE_MANAGER" -> Roles.WAREHOUSE_MANAGER;
-	        case "SUPPLIER" -> Roles.SUPPLIER;
-	        case "AUDITOR" -> Roles.AUDITOR;
-	        default -> throw new IllegalArgumentException("Please specify the allocated Roles");
-	    };
+		return switch (role) {
+		case "EMPLOYEE" -> Roles.EMPLOYEE;
+		case "ADMIN" -> Roles.ADMIN;
+		case "MANAGER" -> Roles.MANAGER;
+		case "FINANCE" -> Roles.FINANCE;
+		case "PROCUREMENT_OFFICER" -> Roles.PROCUREMENT_OFFICER;
+		case "WAREHOUSE_MANAGER" -> Roles.WAREHOUSE_MANAGER;
+		case "SUPPLIER" -> Roles.SUPPLIER;
+		case "AUDITOR" -> Roles.AUDITOR;
+		default -> throw new IllegalArgumentException("Please specify the allocated Roles");
+		};
 	}
-
 
 }
