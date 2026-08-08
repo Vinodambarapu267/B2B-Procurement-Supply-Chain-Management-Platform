@@ -31,7 +31,7 @@ public class PurchaseRequest {
 	private UUID purchaseId;
 	@Column(nullable = false)
 	private UUID requesterId;
-	@Column(columnDefinition = "jsonb", nullable = false)
+	@Column(columnDefinition = "json", nullable = false)
 	@JdbcTypeCode(SqlTypes.JSON)
 	private List<PurchaseItem> items;
 	@Column(nullable = false)
