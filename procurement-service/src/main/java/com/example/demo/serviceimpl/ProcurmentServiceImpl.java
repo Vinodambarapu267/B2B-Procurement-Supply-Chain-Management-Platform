@@ -3,12 +3,15 @@ package com.example.demo.serviceimpl;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.dto.PurchaseItem;
 import com.example.demo.entity.PurchaseRequest;
 import com.example.demo.repository.PurchaseRequestRepository;
 import com.example.demo.service.ProcurementService;
+import com.example.demo.utility.PurchaseStatus;
 
 import lombok.RequiredArgsConstructor;
 
@@ -43,9 +46,16 @@ public class ProcurmentServiceImpl implements ProcurementService {
 	}
 
 	@Override
-	public String updateStatus(UUID purchaseId) {
-		// TODO Auto-generated method stub
-		return null;
+	@Transactional
+	@Modifying
+	public String updateStatus(UUID purchaseId, PurchaseStatus status) {
+		PurchaseRequest purchaseRequest = repository.findById(purchaseId)
+				.orElseThrow(() -> new RuntimeException("This PR Not found"));
+		purchaseRequest.setStatus(status);
+		Integer version = purchaseRequest.getVersion() + 1;
+		purchaseRequest.setVersion(version);
+		repository.save(purchaseRequest);
+		return "UPdated status to " + status;
 	}
 
 }

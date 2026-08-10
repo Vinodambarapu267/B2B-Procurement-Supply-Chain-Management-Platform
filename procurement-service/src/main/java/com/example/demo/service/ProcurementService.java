@@ -6,6 +6,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.entity.PurchaseRequest;
+import com.example.demo.utility.PurchaseStatus;
 
 @Service
 public interface ProcurementService {
@@ -16,6 +17,6 @@ public interface ProcurementService {
 
 	List<PurchaseRequest> findAllPurchaseRequest(UUID requesterId);
 
-	String updateStatus(UUID purchaseId);
+	String updateStatus(UUID purchaseId,PurchaseStatus status);
 
 }
