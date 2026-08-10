@@ -39,8 +39,7 @@ public class ProcurmentServiceImpl implements ProcurementService {
 
 	@Override
 	public List<PurchaseRequest> findAllPurchaseRequest(UUID requesterId) {
-		// TODO Auto-generated method stub
-		return null;
+		return repository.findByrequesterId(requesterId);
 	}
 
 	@Override
