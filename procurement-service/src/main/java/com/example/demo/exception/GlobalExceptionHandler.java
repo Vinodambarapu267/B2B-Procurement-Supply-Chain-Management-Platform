@@ -10,24 +10,29 @@ import org.springframework.web.context.request.WebRequest;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
-	
 	@ExceptionHandler(PurchaseRequestNotFoundException.class)
-	public ResponseEntity<?> handlePurchaseRequestNotFound(PurchaseRequestNotFoundException ex, WebRequest request) {
+	public ResponseEntity<?> handleUserNotFound(PurchaseRequestNotFoundException ex, WebRequest request) {
 		ErrorMessage errorMessage = ErrorMessage.builder()
-		        .localDateTime(LocalDateTime.now())
-		        .statusCode(HttpURLConnection.HTTP_NOT_FOUND)
-		        .message(ex.getMessage())
-		        .path(request.getDescription(false)).build();
+				.localDateTime(LocalDateTime.now())
+				.message(ex.getMessage())
+				.path(request.getDescription(false))
+				.statusCode(HttpURLConnection.HTTP_NOT_FOUND)
+				.build();
 		return ResponseEntity.ok(errorMessage);
 	}
-	@ExceptionHandler
-	public ResponseEntity<?> handleRequesterNotFound(RequesterNotFoundException ex, WebRequest request){
+
+	@ExceptionHandler(RequesterNotFoundException.class)
+	public ResponseEntity<?> handleUserAlreadyExist(RequesterNotFoundException ex, WebRequest request) {
 		ErrorMessage errorMessage = ErrorMessage.builder()
-		        .localDateTime(LocalDateTime.now())
-		        .statusCode(HttpURLConnection.HTTP_NOT_FOUND)
-		        .message(ex.getMessage())
-		        .path(request.getDescription(false)).build();
+				.localDateTime(LocalDateTime.now())
+				.message(ex.getMessage())
+				.path(request.getDescription(false))
+				.statusCode(HttpURLConnection.HTTP_NOT_FOUND)
+				.build();
 		return ResponseEntity.ok(errorMessage);
 	}
+
+	
+=======
 
 }

@@ -12,5 +12,4 @@ public class ErrorMessage {
 	private Integer statusCode;
 	private String message;
 	private String path;
-
 }
