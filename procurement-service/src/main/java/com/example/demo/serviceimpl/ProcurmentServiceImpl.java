@@ -9,6 +9,8 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.dto.PurchaseItem;
 import com.example.demo.entity.PurchaseRequest;
+import com.example.demo.exception.PurchaseRequestNotFoundException;
+import com.example.demo.exception.RequesterNotFoundException;
 import com.example.demo.repository.PurchaseRequestRepository;
 import com.example.demo.service.ProcurementService;
 import com.example.demo.utility.PurchaseStatus;
@@ -37,12 +39,16 @@ public class ProcurmentServiceImpl implements ProcurementService {
 
 	@Override
 	public PurchaseRequest findByPurchaseRequestId(UUID purchaseId) {
-		return repository.findById(purchaseId).orElseThrow(() -> new RuntimeException("This PR Not found"));
+		return repository.findById(purchaseId).orElseThrow(() -> new PurchaseRequestNotFoundException("This PR Not found"));
 	}
 
 	@Override
 	public List<PurchaseRequest> findAllPurchaseRequest(UUID requesterId) {
-		return repository.findByrequesterId(requesterId);
+		List<PurchaseRequest> list = repository.findByrequesterId(requesterId);
+		if(list.isEmpty()) {
+			throw new RequesterNotFoundException("No Purchase Request Found");
+		}
+		return list;
 	}
 
 	@Override
@@ -50,7 +56,7 @@ public class ProcurmentServiceImpl implements ProcurementService {
 	@Modifying
 	public String updateStatus(UUID purchaseId, PurchaseStatus status) {
 		PurchaseRequest purchaseRequest = repository.findById(purchaseId)
-				.orElseThrow(() -> new RuntimeException("This PR Not found"));
+				.orElseThrow(() -> new PurchaseRequestNotFoundException("This PR Not found"));
 		purchaseRequest.setStatus(status);
 		Integer version = purchaseRequest.getVersion() + 1;
 		purchaseRequest.setVersion(version);
