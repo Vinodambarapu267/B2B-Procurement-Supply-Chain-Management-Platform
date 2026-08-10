@@ -5,15 +5,31 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.example.demo.dto.PurchaseItem;
 import com.example.demo.entity.PurchaseRequest;
+import com.example.demo.repository.PurchaseRequestRepository;
 import com.example.demo.service.ProcurementService;
+
+import lombok.RequiredArgsConstructor;
+
 @Service
-public class ProcurmentServiceImpl implements ProcurementService{
+@RequiredArgsConstructor
+public class ProcurmentServiceImpl implements ProcurementService {
+	private final PurchaseRequestRepository repository;
 
 	@Override
 	public PurchaseRequest createPurchaseRequest(PurchaseRequest purchaseRequest) {
-		// TODO Auto-generated method stub
-		return null;
+		PurchaseRequest newPurchaseRequest = new PurchaseRequest();
+		newPurchaseRequest.setRequesterId(purchaseRequest.getRequesterId());
+		newPurchaseRequest.setStatus(purchaseRequest.getStatus());
+		Double totalEstimation =0.0;
+		List<PurchaseItem> items = purchaseRequest.getItems();
+		for (PurchaseItem item : items) {
+			totalEstimation += item.getUnitPrice() * item.getQuantity();
+		}
+		newPurchaseRequest.setItems(items);
+		newPurchaseRequest.setTotalEstimation(totalEstimation);
+		return repository.save(newPurchaseRequest);
 	}
 
 	@Override
