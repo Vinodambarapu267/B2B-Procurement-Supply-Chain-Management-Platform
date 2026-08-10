@@ -1,5 +1,6 @@
 package com.example.demo.comtroller;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -30,5 +31,10 @@ public class ProcurementController {
 	@GetMapping("/{purchaseId}")
 	public PurchaseRequest findBypruchaseId(@PathVariable UUID purchaseId) {
 		return procurementService.findByPurchaseRequestId(purchaseId);
+	}
+
+	@GetMapping("/{requesterId}/all")
+	public List<PurchaseRequest> findAllPurchaseRequest(@PathVariable UUID requesterId) {
+		return procurementService.findAllPurchaseRequest(requesterId);
 	}
 }
