@@ -22,7 +22,7 @@ public class ProcurmentServiceImpl implements ProcurementService {
 		PurchaseRequest newPurchaseRequest = new PurchaseRequest();
 		newPurchaseRequest.setRequesterId(purchaseRequest.getRequesterId());
 		newPurchaseRequest.setStatus(purchaseRequest.getStatus());
-		Double totalEstimation =0.0;
+		Double totalEstimation = 0.0;
 		List<PurchaseItem> items = purchaseRequest.getItems();
 		for (PurchaseItem item : items) {
 			totalEstimation += item.getUnitPrice() * item.getQuantity();
@@ -34,8 +34,7 @@ public class ProcurmentServiceImpl implements ProcurementService {
 
 	@Override
 	public PurchaseRequest findByPurchaseRequestId(UUID purchaseId) {
-		// TODO Auto-generated method stub
-		return null;
+		return repository.findById(purchaseId).orElseThrow(() -> new RuntimeException("This PR Not found"));
 	}
 
 	@Override
