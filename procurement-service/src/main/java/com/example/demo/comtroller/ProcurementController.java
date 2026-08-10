@@ -4,14 +4,17 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.example.demo.entity.PurchaseRequest;
 import com.example.demo.service.ProcurementService;
+import com.example.demo.utility.PurchaseStatus;
 
 import lombok.RequiredArgsConstructor;
 
@@ -36,5 +39,10 @@ public class ProcurementController {
 	@GetMapping("/{requesterId}/all")
 	public List<PurchaseRequest> findAllPurchaseRequest(@PathVariable UUID requesterId) {
 		return procurementService.findAllPurchaseRequest(requesterId);
+	}
+
+	@PatchMapping("/{id}/status")
+	public String updateStatus(@PathVariable UUID id, @RequestParam PurchaseStatus status) {
+		return procurementService.updateStatus(id, status);
 	}
 }
