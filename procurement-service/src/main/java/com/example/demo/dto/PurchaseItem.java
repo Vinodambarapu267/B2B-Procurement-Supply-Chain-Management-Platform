@@ -6,5 +6,6 @@ import lombok.Data;
 public class PurchaseItem {
 	private String itemName;
 	private Integer quantity;
+	private Double unitPrice;
 
 }
