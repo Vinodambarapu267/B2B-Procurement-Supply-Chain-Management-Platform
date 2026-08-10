@@ -32,7 +32,4 @@ public class GlobalExceptionHandler {
 		return ResponseEntity.ok(errorMessage);
 	}
 
-	
-=======
-
 }
