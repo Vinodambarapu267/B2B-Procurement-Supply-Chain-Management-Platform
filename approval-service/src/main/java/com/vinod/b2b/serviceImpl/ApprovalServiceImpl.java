@@ -25,14 +25,16 @@ public class ApprovalServiceImpl implements ApprovalService {
 		approvaDecisions.setDecision(approvalDecisionDto.getDecision());
 		approvaDecisions.setLevel(approvalDecisionDto.getLevel());
 		approvaDecisions.setReason(approvalDecisionDto.getReason());
-		
-		return repository.save(approvaDecisions);
+
 	}
 
 	@Override
 	public List<ApprovalDecisions> findAllPendingDecisions(UUID approvalId) {
-		// TODO Auto-generated method stub
-		return null;
+		List<ApprovalDecisions> allPendingPRs = repository.findAllByApproverId(approvalId);
+		if (allPendingPRs.isEmpty()) {
+			throw new RuntimeException("NO pending records");
+		}
+		return allPendingPRs;
 	}
 
 	@Override
