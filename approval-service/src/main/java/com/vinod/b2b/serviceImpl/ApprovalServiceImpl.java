@@ -40,8 +40,12 @@ public class ApprovalServiceImpl implements ApprovalService {
 
 	@Override
 	public List<ApprovalDecisions> getApprovalHistory(UUID prId) {
-		// TODO Auto-generated method stub
-		return null;
+		List<ApprovalDecisions> listAllPR = repository.findAllByPrId(prId);
+		if (listAllPR.isEmpty()) {
+			throw new RuntimeException("No approval history : " + prId);
+		}
+
+		return listAllPR;
 	}
 
 }
