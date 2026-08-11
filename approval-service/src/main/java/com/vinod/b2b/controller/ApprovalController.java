@@ -33,4 +33,9 @@ public class ApprovalController {
 	public List<ApprovalDecisions> getAllPendingPRs(@RequestParam UUID approverId) {
 		return approvalService.findAllPendingDecisions(approverId);
 	}
+
+	@GetMapping("/{prid}/history")
+	public List<ApprovalDecisions> getHistoryOfPr(@PathVariable(name = "prid") UUID prId) {
+		return approvalService.getApprovalHistory(prId);
+	}
 }
