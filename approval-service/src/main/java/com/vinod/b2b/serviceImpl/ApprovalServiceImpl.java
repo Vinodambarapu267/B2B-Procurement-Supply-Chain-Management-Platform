@@ -5,16 +5,21 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
+import com.vinod.b2b.dto.ApprovalDecisionDto;
 import com.vinod.b2b.entity.ApprovalDecisions;
+import com.vinod.b2b.repository.ApprovalRepository;
 import com.vinod.b2b.service.ApprovalService;
-import com.vinod.b2b.utility.Decision;
+
+import lombok.RequiredArgsConstructor;
 
 @Service
-public class ApprovalServiceImpl implements ApprovalService{
+@RequiredArgsConstructor
+public class ApprovalServiceImpl implements ApprovalService {
+	private final ApprovalRepository repository;
 
 	@Override
-	public ApprovalDecisions addApporvalDecision(UUID prId, UUID approvalId, Decision decision) {
-		// TODO Auto-generated method stub
+	public ApprovalDecisions addApporvalDecision(UUID prId, ApprovalDecisionDto approvalDecisions) {
+		
 		return null;
 	}
 
