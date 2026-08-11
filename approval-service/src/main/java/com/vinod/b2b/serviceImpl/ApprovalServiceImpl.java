@@ -18,9 +18,15 @@ public class ApprovalServiceImpl implements ApprovalService {
 	private final ApprovalRepository repository;
 
 	@Override
-	public ApprovalDecisions addApporvalDecision(UUID prId, ApprovalDecisionDto approvalDecisions) {
+	public ApprovalDecisions addApporvalDecision(UUID prId, ApprovalDecisionDto approvalDecisionDto) {
+		ApprovalDecisions approvaDecisions = new ApprovalDecisions();
+		approvaDecisions.setPrId(prId);
+		approvaDecisions.setApproverId(approvalDecisionDto.getApproverId());
+		approvaDecisions.setDecision(approvalDecisionDto.getDecision());
+		approvaDecisions.setLevel(approvalDecisionDto.getLevel());
+		approvaDecisions.setReason(approvalDecisionDto.getReason());
 		
-		return null;
+		return repository.save(approvaDecisions);
 	}
 
 	@Override
