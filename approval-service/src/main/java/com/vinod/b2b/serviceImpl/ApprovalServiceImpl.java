@@ -26,8 +26,6 @@ public class ApprovalServiceImpl implements ApprovalService {
 		approvaDecisions.setLevel(approvalDecisionDto.getLevel());
 		approvaDecisions.setReason(approvalDecisionDto.getReason());
 
-		return repository.save(approvaDecisions);
-
 	}
 
 	@Override
