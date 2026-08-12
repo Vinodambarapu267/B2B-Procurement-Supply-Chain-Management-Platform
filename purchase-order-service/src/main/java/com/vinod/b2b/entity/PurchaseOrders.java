@@ -28,11 +28,11 @@ public class PurchaseOrders {
 	@Column(nullable = false)
 	private UUID supplierId;
 	@Column(nullable = false, unique = true)
-	private Var poNumber;
+	private String poNumber;
 	@Column(nullable = false)
 	private OrderStatus status;
 	@Column(nullable = false)
 	private Double totalAmount;
 	@Column(nullable = false)
-	private Integer version;
+	private Integer version=0;
 }
