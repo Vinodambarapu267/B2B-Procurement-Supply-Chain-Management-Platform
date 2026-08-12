@@ -5,14 +5,25 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.vinod.b2b.entity.PurchaseOrders;
+import com.vinod.b2b.repository.PurchaseOrderRepository;
 import com.vinod.b2b.service.PurchaseOrderService;
+
+import lombok.RequiredArgsConstructor;
+
 @Service
-public class PurchaseOrderServiceImpl implements PurchaseOrderService{
+@RequiredArgsConstructor
+public class PurchaseOrderServiceImpl implements PurchaseOrderService {
+	private final PurchaseOrderRepository repository;
 
 	@Override
 	public PurchaseOrders generatePurchaseOrder(PurchaseOrders purchaseOrders) {
-		// TODO Auto-generated method stub
-		return null;
+		PurchaseOrders order = new PurchaseOrders();
+		order.setPrId(purchaseOrders.getPrId());
+		order.setSupplierId(purchaseOrders.getSupplierId());
+		order.setPoNumber(generateRandomPONumber());
+		order.setStatus(purchaseOrders.getStatus());
+		order.setTotalAmount(purchaseOrders.getTotalAmount());
+		return repository.save(order);
 	}
 
 	@Override
@@ -27,4 +38,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService{
 		return null;
 	}
 
+	private String generateRandomPONumber() {
+		return UUID.randomUUID().toString().toUpperCase().substring(0, 8);
+	}
 }
