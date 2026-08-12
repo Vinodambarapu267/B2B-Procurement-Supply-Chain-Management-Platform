@@ -7,6 +7,7 @@ import org.springframework.stereotype.Service;
 import com.vinod.b2b.entity.PurchaseOrders;
 import com.vinod.b2b.repository.PurchaseOrderRepository;
 import com.vinod.b2b.service.PurchaseOrderService;
+import com.vinod.b2b.utility.OrderStatus;
 
 import lombok.RequiredArgsConstructor;
 
@@ -27,7 +28,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 	}
 
 	@Override
-	public PurchaseOrders updatePurchaseOrderstatus(UUID purchaseOrderId) {
+	public PurchaseOrders updatePurchaseOrderstatus(UUID purchaseOrderId,OrderStatus status) {
 		// TODO Auto-generated method stub
 		return null;
 	}
