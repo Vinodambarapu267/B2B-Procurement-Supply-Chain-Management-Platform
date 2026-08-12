@@ -29,8 +29,10 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
 	@Override
 	public PurchaseOrders updatePurchaseOrderstatus(UUID purchaseOrderId,OrderStatus status) {
-		// TODO Auto-generated method stub
-		return null;
+		PurchaseOrders purchaseOrder = repository.findById(purchaseOrderId).orElseThrow(()-> new RuntimeException("PUrchase Order not found ID : "+purchaseOrderId));
+		purchaseOrder.setStatus(status);
+		purchaseOrder.setVersion(purchaseOrder.getVersion()+1);
+		return repository.save(purchaseOrder);
 	}
 
 	@Override
