@@ -7,6 +7,8 @@ import org.springframework.stereotype.Service;
 
 import com.vinod.b2b.dto.ApprovalDecisionDto;
 import com.vinod.b2b.entity.ApprovalDecisions;
+import com.vinod.b2b.exceptions.ApproverNotFoundException;
+import com.vinod.b2b.exceptions.PurchaseRequestNotFoundException;
 import com.vinod.b2b.repository.ApprovalRepository;
 import com.vinod.b2b.service.ApprovalService;
 
@@ -33,7 +35,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 	public List<ApprovalDecisions> findAllPendingDecisions(UUID approvalId) {
 		List<ApprovalDecisions> allPendingPRs = repository.findAllByApproverId(approvalId);
 		if (allPendingPRs.isEmpty()) {
-			throw new RuntimeException("NO pending records");
+			throw new ApproverNotFoundException("NO pending records");
 		}
 		return allPendingPRs;
 	}
@@ -42,7 +44,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 	public List<ApprovalDecisions> getApprovalHistory(UUID prId) {
 		List<ApprovalDecisions> listAllPR = repository.findAllByPrId(prId);
 		if (listAllPR.isEmpty()) {
-			throw new RuntimeException("No approval history : " + prId);
+			throw new PurchaseRequestNotFoundException("No approval history : " + prId);
 		}
 
 		return listAllPR;
