@@ -29,13 +29,17 @@ public class SupplierServiceImpl implements SupplierService {
 
 	@Override
 	public Supplier updateSupplierStatus(UUID supplierId) {
-		// TODO Auto-generated method stub
-		return null;
+		Supplier supplier = repository.findById(supplierId)
+				.orElseThrow(() -> new RuntimeException("Supplier not Found"));
+		Boolean isActive = supplier.getIsActive();
+		supplier.setIsActive(!isActive);
+		return repository.save(supplier);
+		
 	}
 
 	@Override
 	public Page<Supplier> getAllSuppliers(int page, String sortBy) {
-		// TODO Auto-generated method stub
+
 		return null;
 	}
 
