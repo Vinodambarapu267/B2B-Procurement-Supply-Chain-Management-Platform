@@ -5,6 +5,7 @@ import java.util.UUID;
 import org.springframework.stereotype.Service;
 
 import com.vinod.b2b.entity.PurchaseOrders;
+import com.vinod.b2b.exceptions.PurchaseOrderNotFoundException;
 import com.vinod.b2b.repository.PurchaseOrderRepository;
 import com.vinod.b2b.service.PurchaseOrderService;
 import com.vinod.b2b.utility.OrderStatus;
@@ -29,7 +30,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
 	@Override
 	public PurchaseOrders updatePurchaseOrderstatus(UUID purchaseOrderId,OrderStatus status) {
-		PurchaseOrders purchaseOrder = repository.findById(purchaseOrderId).orElseThrow(()-> new RuntimeException("PUrchase Order not found ID : "+purchaseOrderId));
+		PurchaseOrders purchaseOrder = repository.findById(purchaseOrderId).orElseThrow(()-> new PurchaseOrderNotFoundException("Purchase Order not found ID : "+purchaseOrderId));
 		purchaseOrder.setStatus(status);
 		purchaseOrder.setVersion(purchaseOrder.getVersion()+1);
 		return repository.save(purchaseOrder);
@@ -37,7 +38,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
 	@Override
 	public PurchaseOrders getPurchaseOrder(UUID purchaseOrderId) {
-		return repository.findById(purchaseOrderId).orElseThrow(()-> new RuntimeException("PurchaseOrder not found ID : "+purchaseOrderId));
+		return repository.findById(purchaseOrderId).orElseThrow(()-> new PurchaseOrderNotFoundException("PurchaseOrder not found ID : "+purchaseOrderId));
 	}
 
 	private String generateRandomPONumber() {
