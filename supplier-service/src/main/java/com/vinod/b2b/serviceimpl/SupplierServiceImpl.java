@@ -3,6 +3,8 @@ package com.vinod.b2b.serviceimpl;
 import java.util.UUID;
 
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.vinod.b2b.entity.Supplier;
@@ -34,13 +36,13 @@ public class SupplierServiceImpl implements SupplierService {
 		Boolean isActive = supplier.getIsActive();
 		supplier.setIsActive(!isActive);
 		return repository.save(supplier);
-		
+
 	}
 
 	@Override
 	public Page<Supplier> getAllSuppliers(int page, String sortBy) {
-
-		return null;
+		PageRequest pageable = PageRequest.of(page, 10, Sort.by(sortBy).descending());
+		return repository.findAll(pageable);
 	}
 
 }
