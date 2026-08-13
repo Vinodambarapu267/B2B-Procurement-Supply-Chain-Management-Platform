@@ -1,5 +1,9 @@
 package com.vinod.b2b.controller;
 
+import java.util.UUID;
+
+import org.springframework.web.bind.annotation.PatchMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,5 +23,10 @@ public class SupplierController {
 	@PostMapping
 	public Supplier createSupplier(@RequestBody Supplier supplier) {
 		return supplierService.createSupplier(supplier);
+	}
+
+	@PatchMapping("/{id}/status")
+	public Supplier updateStatus(@PathVariable(name = "id") UUID supplierId) {
+		return supplierService.updateSupplierStatus(supplierId);
 	}
 }
