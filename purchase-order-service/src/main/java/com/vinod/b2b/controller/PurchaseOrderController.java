@@ -2,6 +2,7 @@ package com.vinod.b2b.controller;
 
 import java.util.UUID;
 
+import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -31,5 +32,10 @@ public class PurchaseOrderController {
 	public PurchaseOrders updatePurchaseOrderStatus(@PathVariable(name = "id") UUID purchaseOrderId,
 			@RequestParam OrderStatus status) {
 		return purchaseOrderService.updatePurchaseOrderstatus(purchaseOrderId, status);
+	}
+	@GetMapping("/{id}")
+	public PurchaseOrders findByPurchaseOrders(@PathVariable(name="id") UUID purchaseOrderId) {
+		return purchaseOrderService.getPurchaseOrder(purchaseOrderId);
+				
 	}
 }
