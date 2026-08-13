@@ -36,9 +36,8 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 	}
 
 	@Override
-	public PurchaseOrders getPurchaseOrdeer(UUID purchaseOrderId) {
-		// TODO Auto-generated method stub
-		return null;
+	public PurchaseOrders getPurchaseOrder(UUID purchaseOrderId) {
+		return repository.findById(purchaseOrderId).orElseThrow(()-> new RuntimeException("PurchaseOrder not found ID : "+purchaseOrderId));
 	}
 
 	private String generateRandomPONumber() {
