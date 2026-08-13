@@ -8,6 +8,8 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 
 import com.vinod.b2b.entity.Supplier;
+import com.vinod.b2b.exceptions.SupplierAlreadyExistException;
+import com.vinod.b2b.exceptions.SupplierNotFoundException;
 import com.vinod.b2b.repository.SupplierRepository;
 import com.vinod.b2b.service.SupplierService;
 
@@ -21,7 +23,8 @@ public class SupplierServiceImpl implements SupplierService {
 	@Override
 	public Supplier createSupplier(Supplier supplier) {
 		repository.findBySupplierName(supplier.getSupplierName()).ifPresent(newPerson -> {
-			throw new RuntimeException("This Supplier ALready Present");
+			throw new SupplierAlreadyExistException(
+					"This Supplier ALready Present Name : " + supplier.getSupplierName());
 		});
 		Supplier newSupplier = new Supplier();
 		newSupplier.setSupplierName(supplier.getSupplierName());
@@ -32,7 +35,7 @@ public class SupplierServiceImpl implements SupplierService {
 	@Override
 	public Supplier updateSupplierStatus(UUID supplierId) {
 		Supplier supplier = repository.findById(supplierId)
-				.orElseThrow(() -> new RuntimeException("Supplier not Found"));
+				.orElseThrow(() -> new SupplierNotFoundException("Supplier not Found ID : " + supplierId));
 		Boolean isActive = supplier.getIsActive();
 		supplier.setIsActive(!isActive);
 		return repository.save(supplier);
@@ -42,7 +45,11 @@ public class SupplierServiceImpl implements SupplierService {
 	@Override
 	public Page<Supplier> getAllSuppliers(int page, String sortBy) {
 		PageRequest pageable = PageRequest.of(page, 10, Sort.by(sortBy).descending());
-		return repository.findAll(pageable);
+		Page<Supplier> all = repository.findAll(pageable);
+		if (all.isEmpty()) {
+			throw new SupplierNotFoundException("NO Records.. ");
+		}
+		return all;
 	}
 
 }
