@@ -13,5 +13,5 @@ public interface PurchaseOrderService {
 
 	PurchaseOrders updatePurchaseOrderstatus(UUID purchaseOrderId,OrderStatus status);
 
-	PurchaseOrders getPurchaseOrdeer(UUID purchaseOrderId);
+	PurchaseOrders getPurchaseOrder(UUID purchaseOrderId);
 }
