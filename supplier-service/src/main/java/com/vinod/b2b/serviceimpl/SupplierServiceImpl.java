@@ -6,15 +6,25 @@ import org.springframework.data.domain.Page;
 import org.springframework.stereotype.Service;
 
 import com.vinod.b2b.entity.Supplier;
+import com.vinod.b2b.repository.SupplierRepository;
 import com.vinod.b2b.service.SupplierService;
 
+import lombok.RequiredArgsConstructor;
+
 @Service
-public class SupplierServiceImpl implements SupplierService{
+@RequiredArgsConstructor
+public class SupplierServiceImpl implements SupplierService {
+	private final SupplierRepository repository;
 
 	@Override
 	public Supplier createSupplier(Supplier supplier) {
-		// TODO Auto-generated method stub
-		return null;
+		repository.findBySupplierName(supplier.getSupplierName()).ifPresent(newPerson -> {
+			throw new RuntimeException("This Supplier ALready Present");
+		});
+		Supplier newSupplier = new Supplier();
+		newSupplier.setSupplierName(supplier.getSupplierName());
+		newSupplier.setCategory(supplier.getCategory());
+		return repository.save(newSupplier);
 	}
 
 	@Override
