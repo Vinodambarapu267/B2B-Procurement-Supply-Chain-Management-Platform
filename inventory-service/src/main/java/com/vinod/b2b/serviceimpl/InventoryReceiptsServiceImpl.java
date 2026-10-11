@@ -41,13 +41,13 @@ public class InventoryReceiptsServiceImpl implements InventoryReceiptsService {
 
 	@Override
 	public InventoryReceipt getInventoryReceiptById(UUID id) {
-		// TODO Auto-generated method stub
-		return null;
+		InventoryReceipt receipt = receiptsRepository.findById(id)
+				.orElseThrow(() -> new RuntimeException("Receipt not Found :" + id));
+		return receipt;
 	}
 
 	@Override
 	public List<InventoryReceipt> getAllDiscrepancies() {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
