@@ -15,7 +15,7 @@ import com.vinod.b2b.entity.InventoryItem;
 import com.vinod.b2b.service.InventoryItemService;
 
 @RestController
-@RequestMapping("/api/v1/inventory")
+@RequestMapping("/api/v1/inventory/items")
 public class InventoryItemsController {
 	private final InventoryItemService inventoryItemService;
 
