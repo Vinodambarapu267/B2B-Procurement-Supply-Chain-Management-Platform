@@ -29,12 +29,16 @@ public class InventoryReceiptsServiceImpl implements InventoryReceiptsService {
 		UUID itemId = inventoryReceipt.getItemId().getItemId();
 		InventoryItem inventoryItem = inventoryItemsRepository.findById(itemId)
 				.orElseThrow(() -> new RuntimeException("InventoryItem Not Found" + itemId));
-		Integer quantitityReceived = inventoryReceipt.getQuantitityReceived();
+		Integer quantitityReceived = inventoryReceipt.getQuantityReceived();
 		if (quantitityReceived <= 0) {
 			throw new IllegalArgumentException("Quantity received must be greater than zero");
 		}
 		inventoryItem.setQuantityOnHand(inventoryItem.getQuantityOnHand() + quantitityReceived);
 		inventoryReceipt.setItemId(inventoryItem);
+		if (inventoryReceipt.getQuantityExpected() != inventoryReceipt.getQuantityReceived()) {
+			inventoryReceipt.setDiscrepancyFlag(true);
+		}
+		//inventoryReceipt.setReceivedBy(inventoryReceipt.getReceivedBy());
 		inventoryItemsRepository.save(inventoryItem);
 		return receiptsRepository.save(inventoryReceipt);
 	}
