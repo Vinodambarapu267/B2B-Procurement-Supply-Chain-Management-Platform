@@ -24,8 +24,8 @@ public class InventoryItemsServiceImpl implements InventoryItemService {
 
 	@Override
 	public InventoryItem getInventoryItemBySku(String sku) {
-		// TODO Auto-generated method stub
-		return null;
+		InventoryItem inventoryItem = itemsRepository.findBySku(sku);
+		return inventoryItem;
 	}
 
 	@Override
