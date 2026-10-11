@@ -9,7 +9,7 @@ public interface InventoryItemService {
 
 	public InventoryItem getInventoryItemBySku(String sku);
 
-	public String updateInventoryThreshold(String sku);
+	public String updateInventoryThreshold(String sku,Integer threshold);
 
 	public List<InventoryItem> getAllInventoryItems();
 
