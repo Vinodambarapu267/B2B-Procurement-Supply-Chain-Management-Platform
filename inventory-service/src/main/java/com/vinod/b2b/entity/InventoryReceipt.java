@@ -31,11 +31,11 @@ public class InventoryReceipt {
 	@Column(nullable = false)
 	private Integer quantityExpected;
 	@Column(nullable = false)
-	private Integer quantitityReceived;
-	private Boolean discrepencyFlag = false;
+	private Integer quantityReceived;
+	private Boolean discrepancyFlag = false;
 	@Column(nullable = false)
 	private String receivedBy;
 	@Column(nullable = false)
 	@CreationTimestamp
-	private LocalDateTime recivedAt;
+	private LocalDateTime receivedAt;
 }
