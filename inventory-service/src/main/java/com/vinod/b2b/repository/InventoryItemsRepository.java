@@ -6,6 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import com.vinod.b2b.entity.InventoryItem;
 
-public interface InventoryItemsRepository extends JpaRepository<InventoryItem, UUID>{
-
+public interface InventoryItemsRepository extends JpaRepository<InventoryItem, UUID> {
+	InventoryItem findBySku(String sku);
 }
