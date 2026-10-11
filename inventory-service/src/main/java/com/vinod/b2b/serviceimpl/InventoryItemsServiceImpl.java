@@ -2,6 +2,7 @@ package com.vinod.b2b.serviceimpl;
 
 import java.util.List;
 
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 
 import com.vinod.b2b.entity.InventoryItem;
@@ -29,9 +30,13 @@ public class InventoryItemsServiceImpl implements InventoryItemService {
 	}
 
 	@Override
-	public String updateInventoryThreshold(String sku) {
-		// TODO Auto-generated method stub
-		return null;
+	@Modifying
+	public String updateInventoryThreshold(String sku, Integer threshold) {
+		InventoryItem inventoryItem = itemsRepository.findBySku(sku);
+		inventoryItem.setRecordThreshold(threshold);
+		InventoryItem save = itemsRepository.save(inventoryItem);
+		return "updated the threshold value : "+save.getRecordThreshold();
+
 	}
 
 	@Override
