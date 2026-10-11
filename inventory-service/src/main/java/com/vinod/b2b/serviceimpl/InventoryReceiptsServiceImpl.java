@@ -1,5 +1,6 @@
 package com.vinod.b2b.serviceimpl;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -38,7 +39,7 @@ public class InventoryReceiptsServiceImpl implements InventoryReceiptsService {
 		if (inventoryReceipt.getQuantityExpected() != inventoryReceipt.getQuantityReceived()) {
 			inventoryReceipt.setDiscrepancyFlag(true);
 		}
-		//inventoryReceipt.setReceivedBy(inventoryReceipt.getReceivedBy());
+		// inventoryReceipt.setReceivedBy(inventoryReceipt.getReceivedBy());
 		inventoryItemsRepository.save(inventoryItem);
 		return receiptsRepository.save(inventoryReceipt);
 	}
@@ -52,7 +53,17 @@ public class InventoryReceiptsServiceImpl implements InventoryReceiptsService {
 
 	@Override
 	public List<InventoryReceipt> getAllDiscrepancies() {
-		return null;
+		List<InventoryReceipt> inventoryReceipts = receiptsRepository.findAll();
+		List<InventoryReceipt> discrepencies = new ArrayList<>();
+		for (InventoryReceipt receipt : inventoryReceipts) {
+			if (receipt.getDiscrepancyFlag()) {
+				discrepencies.add(receipt);
+			}
+		}
+		if (discrepencies.isEmpty()) {
+			throw new RuntimeException("No discrepancies list");
+		}
+		return discrepencies;
 	}
 
 }
