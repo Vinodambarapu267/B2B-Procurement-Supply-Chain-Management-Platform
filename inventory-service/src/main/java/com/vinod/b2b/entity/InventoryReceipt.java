@@ -1,6 +1,9 @@
 package com.vinod.b2b.entity;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
+
+import org.hibernate.annotations.CreationTimestamp;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -28,4 +31,10 @@ public class InventoryReceipt {
 	@Column(nullable = false)
 	private Integer quantitityReceived;
 	private Boolean discrepencyFlag = false;
+	private Boolean qualityIssue = false;
+	@Column(nullable = false)
+	private String recivedBy;
+	@Column(nullable = false)
+	@CreationTimestamp
+	private LocalDateTime recivedAt;
 }
