@@ -29,11 +29,12 @@ public class InventoryReceipt {
 	@JoinColumn(name = "item_id", nullable = false)
 	private InventoryItem itemId;
 	@Column(nullable = false)
+	private Integer quantityExpected;
+	@Column(nullable = false)
 	private Integer quantitityReceived;
 	private Boolean discrepencyFlag = false;
-	private Boolean qualityIssue = false;
 	@Column(nullable = false)
-	private String recivedBy;
+	private String receivedBy;
 	@Column(nullable = false)
 	@CreationTimestamp
 	private LocalDateTime recivedAt;
