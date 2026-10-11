@@ -1,5 +1,6 @@
 package com.vinod.b2b.controller;
 
+import java.util.List;
 import java.util.UUID;
 
 import org.springframework.web.bind.annotation.GetMapping;
@@ -32,5 +33,10 @@ public class InventoryReceiptsController {
 	public InventoryReceipt getInventoryReceiptById(@PathVariable UUID id) {
 		return inventoryReceiptsService.getInventoryReceiptById(id);
 
+	}
+
+	@GetMapping("/discrepancies")
+	public List<InventoryReceipt> getListOfDiscrepancies() {
+		return inventoryReceiptsService.getAllDiscrepancies();
 	}
 }
