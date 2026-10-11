@@ -35,14 +35,17 @@ public class InventoryItemsServiceImpl implements InventoryItemService {
 		InventoryItem inventoryItem = itemsRepository.findBySku(sku);
 		inventoryItem.setRecordThreshold(threshold);
 		InventoryItem save = itemsRepository.save(inventoryItem);
-		return "updated the threshold value : "+save.getRecordThreshold();
+		return "updated the threshold value : " + save.getRecordThreshold();
 
 	}
 
 	@Override
 	public List<InventoryItem> getAllInventoryItems() {
-		// TODO Auto-generated method stub
-		return null;
+		List<InventoryItem> inventoryItems = itemsRepository.findAll();
+		if (inventoryItems.isEmpty())
+			throw new RuntimeException(" Inventory items are empty");
+
+		return inventoryItems;
 	}
 
 }
