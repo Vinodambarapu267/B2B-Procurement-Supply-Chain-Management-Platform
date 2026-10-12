@@ -1,7 +1,9 @@
 package com.vinod.b2b.controller;
 
+import java.net.HttpURLConnection;
 import java.util.List;
 
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -13,6 +15,8 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.vinod.b2b.entity.InventoryItem;
 import com.vinod.b2b.service.InventoryItemService;
+import com.vinod.b2b.utility.ResponseMessage;
+import com.vinod.b2b.utility.ResponseStatus;
 
 @RestController
 @RequestMapping("/api/v1/inventory/items")
@@ -25,14 +29,48 @@ public class InventoryItemsController {
 	}
 
 	@PostMapping()
-	public InventoryItem addInventoryItem(@RequestBody InventoryItem item) {
-		return inventoryItemService.addInventoryItem(item);
+	public ResponseEntity<?> addInventoryItem(@RequestBody InventoryItem item) {
+		InventoryItem inventoryItem = inventoryItemService.addInventoryItem(item);
+		if (inventoryItem == null) {
+			return ResponseEntity.ok(
+					ResponseMessage.builder()
+					.message("Inventory Item adding failed..")
+					.status(ResponseStatus.FAILURE.name())
+					.statuscode(HttpURLConnection.HTTP_NOT_FOUND)
+					.build()
+					);
 
+		}
+		return ResponseEntity.ok(
+				ResponseMessage.builder()
+				.message("Inventory Item added Successfull..")
+				.status(ResponseStatus.SUCCESS.name())
+				.statuscode(HttpURLConnection.HTTP_CREATED)
+				.data(inventoryItem)
+				.build()
+				);
 	}
 
 	@GetMapping("/{sku}")
-	public InventoryItem getBySku(@PathVariable String sku) {
-		return inventoryItemService.getInventoryItemBySku(sku);
+	public ResponseEntity<?> getBySku(@PathVariable String sku) {
+		InventoryItem inventoryItem = inventoryItemService.getInventoryItemBySku(sku);
+		if (inventoryItem == null) {
+			return ResponseEntity.ok(ResponseMessage.builder()
+					.message("Inventory Item retrival failed")
+					.status(ResponseStatus.FAILURE.name())
+					.statuscode(HttpURLConnection.HTTP_NO_CONTENT)
+					.build()
+					);
+
+		}
+		return ResponseEntity.ok(
+				ResponseMessage.builder()
+				.message("Inventory Item retrival Successfull..")
+				.status(ResponseStatus.SUCCESS.name())
+				.statuscode(HttpURLConnection.HTTP_OK)
+				.data(inventoryItem)
+				.build()
+				);
 	}
 
 	@PutMapping("/{sku}/threshold")
@@ -41,7 +79,25 @@ public class InventoryItemsController {
 	}
 
 	@GetMapping
-	public List<InventoryItem> findAllInventoryItems() {
-		return inventoryItemService.getAllInventoryItems();
+	public ResponseEntity<?> findAllInventoryItems() {
+		List<InventoryItem> inventoryItems = inventoryItemService.getAllInventoryItems();
+		if (inventoryItems == null) {
+			return ResponseEntity.ok(
+					ResponseMessage.builder()
+					.message("Inventory Item retrival failed..")
+					.status(ResponseStatus.FAILURE.name())
+					.statuscode(HttpURLConnection.HTTP_NOT_FOUND)
+					.build()
+					);
+
+		}
+		return ResponseEntity.ok(
+				ResponseMessage.builder()
+				.message("All Inventory Item retrived Successful..")
+				.status(ResponseStatus.SUCCESS.name())
+				.statuscode(HttpURLConnection.HTTP_ACCEPTED)
+				.data(inventoryItems)
+				.build()
+				);
 	}
 }
