@@ -25,14 +25,16 @@ public class InventoryItemsServiceImpl implements InventoryItemService {
 
 	@Override
 	public InventoryItem getInventoryItemBySku(String sku) {
-		InventoryItem inventoryItem = itemsRepository.findBySku(sku);
+		InventoryItem inventoryItem = itemsRepository.findBySku(sku)
+				.orElseThrow(() -> new RuntimeException("Item not found : " + sku));
 		return inventoryItem;
 	}
 
 	@Override
 	@Modifying
 	public String updateInventoryThreshold(String sku, Integer threshold) {
-		InventoryItem inventoryItem = itemsRepository.findBySku(sku);
+		InventoryItem inventoryItem = itemsRepository.findBySku(sku)
+				.orElseThrow(() -> new RuntimeException("Item not found : " + sku));
 		inventoryItem.setRecordThreshold(threshold);
 		InventoryItem save = itemsRepository.save(inventoryItem);
 		return "updated the threshold value : " + save.getRecordThreshold();
@@ -44,7 +46,6 @@ public class InventoryItemsServiceImpl implements InventoryItemService {
 		List<InventoryItem> inventoryItems = itemsRepository.findAll();
 		if (inventoryItems.isEmpty())
 			throw new RuntimeException(" Inventory items are empty");
-
 		return inventoryItems;
 	}
 
