@@ -3,27 +3,26 @@ package com.example.demo.controller;
 import java.util.UUID;
 
 import org.springframework.security.authentication.AuthenticationManager;
-<<<<<<< Updated upstream
-=======
+
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PatchMapping;
-import org.springframework.web.bind.annotation.PathVariable;
->>>>>>> Stashed changes
+
+
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
-<<<<<<< Updated upstream
-=======
+
 import com.example.demo.dto.AuthRequest;
 import com.example.demo.dto.LoginDto;
-import com.example.demo.dto.UserDto;
->>>>>>> Stashed changes
+
 import com.example.demo.entity.Users;
+import com.example.demo.exceptions.InvalidTokenException;
+import com.example.demo.exceptions.UserNotFoundException;
 import com.example.demo.repository.UserCredentialRepository;
 import com.example.demo.service.AuthService;
 
@@ -36,13 +35,12 @@ public class AuthController {
 	private final AuthService authService;
 	private final AuthenticationManager authenticationManager;
 	private final UserCredentialRepository credentialRepository;
+	private final BCryptPasswordEncoder passwordEncoder;
 
 	@PostMapping("/register")
 	public Users registerUser(@RequestBody Users user) {
 		return authService.registerUser(user);
 	}
-<<<<<<< Updated upstream
-=======
 
 	@PostMapping("/token")
 	public String getToken(@RequestBody AuthRequest authRequest) {
@@ -74,5 +72,5 @@ public class AuthController {
 	public UserDto updateStatus(@PathVariable UUID userId) {
 		return authService.updateStatus(userId);
 	}
->>>>>>> Stashed changes
+
 }

@@ -9,6 +9,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.dto.UserDto;
 import com.example.demo.entity.Users;
+import com.example.demo.exceptions.InvalidPasswordException;
+import com.example.demo.exceptions.InvalidTokenException;
+import com.example.demo.exceptions.UserNotFoundException;
 import com.example.demo.repository.UserCredentialRepository;
 import com.example.demo.utility.Roles;
 
@@ -36,24 +39,16 @@ public class AuthService {
 		return jwtUtil.generateToken(username, role);
 	}
 
-	public void validateToken(String token) {
+	public String validateToken(String token) {
 		if (!jwtUtil.validateToken(token)) {
-			throw new RuntimeException("Token is invalid or expired");
+			throw new InvalidTokenException("Token is invalid or expired");
 		}
-<<<<<<< Updated upstream
-	}
 
 	public String login(String email, String password) {
-		Users user = repository.findByEmail(email).orElseThrow(() -> new RuntimeException("User not found"));
-=======
-		return jwtUtil.validateToken(token) ? "valid token" : "invalid token";
-	}
+		Users user = repository.findByEmail(email).orElseThrow(()-> new UserNotFoundException("User not Found"));
 
-	public String login(String email, String password) {
-		Users user = repository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("User not Found"));
->>>>>>> Stashed changes
 		if (!passwordEncoder.matches(password, user.getPassword())) {
-			throw new RuntimeException("Invalid password");
+			throw new InvalidPasswordException("Invalid password");
 		}
 		String token = jwtUtil.generateToken(user.getUsername(), user.getRole());
 
