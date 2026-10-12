@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 
 import com.vinod.b2b.entity.InventoryItem;
 import com.vinod.b2b.entity.InventoryReceipt;
+import com.vinod.b2b.exceptions.InventoryItemNotFoundException;
+import com.vinod.b2b.exceptions.InventoryReceiptNotFoundException;
 import com.vinod.b2b.repository.InventoryItemsRepository;
 import com.vinod.b2b.repository.InventoryReceiptsRepository;
 import com.vinod.b2b.service.InventoryReceiptsService;
@@ -29,10 +31,10 @@ public class InventoryReceiptsServiceImpl implements InventoryReceiptsService {
 	public InventoryReceipt addInventoryReceipt(InventoryReceipt inventoryReceipt) {
 		UUID itemId = inventoryReceipt.getItemId().getItemId();
 		InventoryItem inventoryItem = inventoryItemsRepository.findById(itemId)
-				.orElseThrow(() -> new RuntimeException("InventoryItem Not Found" + itemId));
+				.orElseThrow(() -> new InventoryItemNotFoundException("Inventory Item Not Found" + itemId));
 		Integer quantitityReceived = inventoryReceipt.getQuantityReceived();
 		if (quantitityReceived <= 0) {
-			throw new IllegalArgumentException("Quantity received must be greater than zero");
+			throw new RuntimeException("Quantity received must be greater than zero");
 		}
 		inventoryItem.setQuantityOnHand(inventoryItem.getQuantityOnHand() + quantitityReceived);
 		inventoryReceipt.setItemId(inventoryItem);
@@ -47,7 +49,7 @@ public class InventoryReceiptsServiceImpl implements InventoryReceiptsService {
 	@Override
 	public InventoryReceipt getInventoryReceiptById(UUID id) {
 		InventoryReceipt receipt = receiptsRepository.findById(id)
-				.orElseThrow(() -> new RuntimeException("Receipt not Found :" + id));
+				.orElseThrow(() -> new InventoryReceiptNotFoundException("Receipt not Found :" + id));
 		return receipt;
 	}
 
@@ -61,7 +63,7 @@ public class InventoryReceiptsServiceImpl implements InventoryReceiptsService {
 			}
 		}
 		if (discrepencies.isEmpty()) {
-			throw new RuntimeException("No discrepancies list");
+			throw new InventoryReceiptNotFoundException("No discrepancies list");
 		}
 		return discrepencies;
 	}
