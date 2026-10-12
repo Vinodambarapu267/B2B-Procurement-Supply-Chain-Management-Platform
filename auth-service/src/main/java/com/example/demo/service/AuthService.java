@@ -43,9 +43,11 @@ public class AuthService {
 		if (!jwtUtil.validateToken(token)) {
 			throw new InvalidTokenException("Token is invalid or expired");
 		}
+		return token;
+	}
 
 	public String login(String email, String password) {
-		Users user = repository.findByEmail(email).orElseThrow(()-> new UserNotFoundException("User not Found"));
+		Users user = repository.findByEmail(email).orElseThrow(() -> new UserNotFoundException("User not Found"));
 
 		if (!passwordEncoder.matches(password, user.getPassword())) {
 			throw new InvalidPasswordException("Invalid password");
@@ -54,17 +56,14 @@ public class AuthService {
 
 		return token;
 	}
+
 	@Transactional
 	public UserDto updateStatus(UUID userId) {
 		Users user = repository.findById(userId)
 				.orElseThrow(() -> new UserNotFoundException("User not found : " + userId));
 		user.setIs_active(!user.getIs_active());
 		Users updatedUser = repository.save(user);
-		return UserDto.builder()
-				.status(updatedUser.getIs_active())
-				.userId(updatedUser.getId())
-				.role(updatedUser.getRole())
-				.username(updatedUser.getUsername())
-				.build();
+		return UserDto.builder().status(updatedUser.getIs_active()).userId(updatedUser.getId())
+				.role(updatedUser.getRole()).username(updatedUser.getUsername()).build();
 	}
 }
