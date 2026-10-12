@@ -27,8 +27,28 @@ public class GlobalExceptionHandler {
 		ErrorMessage errorMessage = ErrorMessage.builder()
 				.localDateTime(LocalDateTime.now())
 				.message(exception.getLocalizedMessage())
-				.statusCode(HttpURLConnection.HTTP_NOT_ACCEPTABLE)
+				.statusCode(HttpURLConnection.HTTP_NOT_FOUND)
 				.path(request.getDescription(false)).build();
 		return ResponseEntity.ok(errorMessage);
 	}
+	
+	@ExceptionHandler(InventoryReceiptNotFoundException.class)
+	public ResponseEntity<?> handleReceiptNotFound(InventoryReceiptNotFoundException exception, WebRequest request) {
+		ErrorMessage errorMessage = ErrorMessage.builder()
+				.localDateTime(LocalDateTime.now())
+				.message(exception.getLocalizedMessage())
+				.statusCode(HttpURLConnection.HTTP_NOT_MODIFIED)
+				.path(request.getDescription(false)).build();
+		return ResponseEntity.ok(errorMessage);
+	}
+	@ExceptionHandler(RuntimeException.class)
+	public ResponseEntity<?> handleException(RuntimeException exception, WebRequest request) {
+		ErrorMessage errorMessage = ErrorMessage.builder()
+				.localDateTime(LocalDateTime.now())
+				.message(exception.getLocalizedMessage())
+				.statusCode(HttpURLConnection.HTTP_INTERNAL_ERROR)
+				.path(request.getDescription(false)).build();
+		return ResponseEntity.ok(errorMessage);
+	}
+	
 }
