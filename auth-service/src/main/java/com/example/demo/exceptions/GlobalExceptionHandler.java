@@ -37,4 +37,11 @@ public class GlobalExceptionHandler {
 				HttpStatus.UNAUTHORIZED.getReasonPhrase(), exception.getLocalizedMessage(), request.getDescription(false));
 		return errorMessage;
 	}
+	
+	@ExceptionHandler(UserAlreadyExistException.class)
+	public Object handleInvalidPassword(UserAlreadyExistException exception, WebRequest request) {
+		ErrorMessage errorMessage = new ErrorMessage(LocalDateTime.now(), HttpStatus.BAD_REQUEST.value(),
+				HttpStatus.BAD_REQUEST.getReasonPhrase(), exception.getLocalizedMessage(), request.getDescription(false));
+		return errorMessage;
+	}
 }
