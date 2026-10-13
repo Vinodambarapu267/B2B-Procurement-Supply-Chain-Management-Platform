@@ -11,6 +11,9 @@ import com.example.demo.entity.UserProfiles;
 import com.example.demo.exceptions.ManagerNotFoundException;
 import com.example.demo.exceptions.UserAlreadyExistException;
 import com.example.demo.exceptions.UserNotFoundException;
+import com.example.demo.kafka.EventType;
+import com.example.demo.kafka.KafkaUserProducer;
+import com.example.demo.kafka.UserEvent;
 import com.example.demo.repository.UserProfilesRepository;
 import com.example.demo.service.UserService;
 import com.example.demo.utility.Roles;
@@ -21,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class UserServiceimpl implements UserService {
 	private final UserProfilesRepository repository;
+	private final KafkaUserProducer kafkaUserProducer;
 
 	@Override
 	public UserProfiles createUser(UserProfiles user) {
@@ -88,6 +92,11 @@ public class UserServiceimpl implements UserService {
 	public String deleteUser(String name) {
 		UserProfiles userProfile = repository.findByName(name)
 				.orElseThrow(() -> new UserNotFoundException("User not Found with Name :" + name));
+
+		UserEvent event = new UserEvent();
+		event.setEventType(EventType.DELETED);
+		event.setUserId(userProfile.getId());
+		kafkaUserProducer.pulishUserDeleted(event);
 		repository.removeManagerReference(userProfile.getId());
 		repository.delete(userProfile);
 		return "deleted successfully";
