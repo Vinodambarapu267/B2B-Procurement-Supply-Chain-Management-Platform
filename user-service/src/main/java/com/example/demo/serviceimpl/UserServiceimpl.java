@@ -56,7 +56,16 @@ public class UserServiceimpl implements UserService {
 			existedUser.setManager(mananger);
 		}
 		existedUser.setIsActive(profileDto.getIsActive());
-		return repository.save(existedUser);
+
+		UserProfiles updated = repository.save(existedUser);
+		UserEvent event = new UserEvent();
+		event.setUserId(updated.getId());
+		event.setUsername(updated.getName());
+		event.setEventType(EventType.UPDATED);
+		event.setRole(updated.getRole());
+		event.setIsActive(updated.getIsActive());
+		kafkaUserProducer.publishUserUpdate(event);
+		return updated;
 	}
 
 	@Override
