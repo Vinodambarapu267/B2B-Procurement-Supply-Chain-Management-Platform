@@ -12,6 +12,7 @@ import com.example.demo.dto.UserDto;
 import com.example.demo.entity.Users;
 import com.example.demo.exceptions.InvalidPasswordException;
 import com.example.demo.exceptions.InvalidTokenException;
+import com.example.demo.exceptions.UserAlreadyExistException;
 import com.example.demo.exceptions.UserNotFoundException;
 import com.example.demo.kafka.EventType;
 import com.example.demo.kafka.KafkaUserProducer;
@@ -32,6 +33,9 @@ public class AuthService {
 	private final KafkaUserProducer kafkaUserProducer;
 
 	public Users registerUser(Users users) {
+		repository.findByEmail(users.getEmail()).ifPresent(user -> {
+			throw new UserAlreadyExistException("User Already Exist :" + users.getEmail());
+		});
 		Users user = new Users();
 		user.setEmail(users.getEmail());
 		user.setUsername(users.getUsername());
@@ -39,13 +43,8 @@ public class AuthService {
 		user.setPassword(passwordEncoder.encode(users.getPassword()));
 
 		Users save = repository.save(user);
-		UserEvent userEvent = UserEvent.builder()
-				.userId(save.getId())
-				.username(save.getUsername())
-				.isActive(save.getIs_active())
-				.role(save.getRole())
-				.eventType(EventType.REGISTERED)
-				.build();
+		UserEvent userEvent = UserEvent.builder().userId(save.getId()).username(save.getUsername())
+				.isActive(save.getIs_active()).role(save.getRole()).eventType(EventType.REGISTERED).build();
 		kafkaUserProducer.publishUserRegistered(userEvent);
 		return save;
 	}
