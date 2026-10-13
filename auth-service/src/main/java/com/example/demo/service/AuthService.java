@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import java.util.UUID;
 
+import org.apache.kafka.common.message.ApiVersionsResponseData.FinalizedFeatureKey;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -12,6 +13,9 @@ import com.example.demo.entity.Users;
 import com.example.demo.exceptions.InvalidPasswordException;
 import com.example.demo.exceptions.InvalidTokenException;
 import com.example.demo.exceptions.UserNotFoundException;
+import com.example.demo.kafka.EventType;
+import com.example.demo.kafka.KafkaUserProducer;
+import com.example.demo.kafka.UserEvent;
 import com.example.demo.repository.UserCredentialRepository;
 import com.example.demo.utility.Roles;
 
@@ -25,6 +29,7 @@ public class AuthService {
 	private final UserCredentialRepository repository;
 	private final BCryptPasswordEncoder passwordEncoder;
 	private final JwtUtil jwtUtil;
+	private final KafkaUserProducer kafkaUserProducer;
 
 	public Users registerUser(Users users) {
 		Users user = new Users();
@@ -32,7 +37,17 @@ public class AuthService {
 		user.setUsername(users.getUsername());
 		user.setRole(users.getRole());
 		user.setPassword(passwordEncoder.encode(users.getPassword()));
-		return repository.save(user);
+
+		Users save = repository.save(user);
+		UserEvent userEvent = UserEvent.builder()
+				.userId(save.getId())
+				.username(save.getUsername())
+				.isActive(save.getIs_active())
+				.role(save.getRole())
+				.eventType(EventType.REGISTERED)
+				.build();
+		kafkaUserProducer.publishUserRegistered(userEvent);
+		return save;
 	}
 
 	public String generateToken(String username, Roles role) {
