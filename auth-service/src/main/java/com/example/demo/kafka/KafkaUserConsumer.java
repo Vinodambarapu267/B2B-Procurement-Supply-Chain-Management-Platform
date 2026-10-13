@@ -15,7 +15,7 @@ public class KafkaUserConsumer {
 		this.credentialRepository = credentialRepository;
 	}
 
-	@KafkaListener(topics = { "user-deleted","user-role-updated"}, groupId = "user-service-group")
+	@KafkaListener(topics = { "user-deleted", "user-role-updated", "user-updated" }, groupId = "user-service-group")
 	public void handleUSerConsumerEvents(UserEvent event) {
 		if (event == null) {
 			throw new RuntimeException("Event is null");
@@ -33,9 +33,15 @@ public class KafkaUserConsumer {
 			Users user = credentialRepository.findById(event.getUserId())
 					.orElseThrow(() -> new RuntimeException("User not Found : " + event.getUserId()));
 			user.setId(event.getUserId());
+			user.setRole(event.getRole());
+			credentialRepository.save(user);
+		}
+		if (EventType.UPDATED.equals(event.getEventType())) {
+			Users user = credentialRepository.findById(event.getUserId())
+					.orElseThrow(() -> new RuntimeException("User not Found : " + event.getUserId()));
+			user.setId(event.getUserId());
 			user.setUsername(event.getUsername());
 			user.setRole(event.getRole());
-			user.setIs_active(event.getIsActive());
 			credentialRepository.save(user);
 		}
 	}
