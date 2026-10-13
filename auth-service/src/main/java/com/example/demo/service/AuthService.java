@@ -78,6 +78,15 @@ public class AuthService {
 				.orElseThrow(() -> new UserNotFoundException("User not found : " + userId));
 		user.setIs_active(!user.getIs_active());
 		Users updatedUser = repository.save(user);
+		
+	kafkaUserProducer.publishUserStatusChange(UserEvent.builder()
+			.userId(updatedUser.getId())
+			.username(updatedUser.getUsername())
+			.role(updatedUser.getRole())
+			.isActive(updatedUser.getIs_active())
+			.eventType(EventType.STATUS_CHANGE)
+			.build()
+			);
 		return UserDto.builder().status(updatedUser.getIs_active()).userId(updatedUser.getId())
 				.role(updatedUser.getRole()).username(updatedUser.getUsername()).build();
 	}
