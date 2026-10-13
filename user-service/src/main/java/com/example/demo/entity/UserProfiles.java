@@ -27,7 +27,6 @@ import lombok.Data;
 @Data
 public class UserProfiles {
 	@Id
-	@GeneratedValue(strategy = GenerationType.UUID)
 	private UUID id;
 	@Column(nullable = false, length = 150)
 	private String name;
