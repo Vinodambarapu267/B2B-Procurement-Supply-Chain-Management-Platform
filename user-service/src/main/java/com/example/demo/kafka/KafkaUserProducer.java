@@ -15,4 +15,8 @@ public class KafkaUserProducer {
 	public void pulishUserDeleted(UserEvent event) {
 		kafkaTemplate.send("user-deleted", event.getUserId().toString(), event);
 	}
+
+	public void publishUserRole(UserEvent event) {
+		kafkaTemplate.send("user-role-updated", event.getUserId().toString(), event);
+	}
 }

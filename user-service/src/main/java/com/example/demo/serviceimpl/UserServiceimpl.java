@@ -65,7 +65,15 @@ public class UserServiceimpl implements UserService {
 		UserProfiles userProfiles = repository.findById(id)
 				.orElseThrow(() -> new UserNotFoundException("User not found ID : " + id));
 		userProfiles.setRole(handleUpdateRole(role));
-		return repository.save(userProfiles);
+		UserProfiles save = repository.save(userProfiles);
+		UserEvent event = new UserEvent();
+		event.setUserId(save.getId());
+		event.setUsername(save.getName());
+		event.setEventType(EventType.UPDATE_ROLE);
+		event.setRole(save.getRole());
+		event.setIsActive(save.getIsActive());
+		kafkaUserProducer.publishUserRole(event);
+		return save;
 	}
 
 	@Override
