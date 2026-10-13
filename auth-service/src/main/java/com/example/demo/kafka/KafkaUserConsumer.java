@@ -14,9 +14,13 @@ public class KafkaUserConsumer {
 		super();
 		this.credentialRepository = credentialRepository;
 	}
+<<<<<<< HEAD
 	
 	
 	
+=======
+
+>>>>>>> ad62ac8436ecce5ca6490304d3e3a570af100f2a
 	@KafkaListener(topics = { "user-deleted" }, groupId = "user-service-group")
 	public void handleUSerConsumerEvents(UserEvent event) {
 		if (event == null) {
