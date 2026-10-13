@@ -20,31 +20,33 @@ public class KafkaUserConsumer {
 		this.repository = repository;
 	}
 
-	@KafkaListener(topics = { "user-registered","user-status-changed" }, groupId = "auth-service-group")
+	@KafkaListener(topics = { "user-registered", "user-status-changed" }, groupId = "auth-service-group")
 	public void handleUserConsumerEvent(UserEvent event) {
-		if (event == null) {
-			throw new RuntimeException("UserEvent is null");
+		if (event == null || event.getEventType() == null) {
+			throw new RuntimeException("UserEvent or Event type is null");
 		}
-		if (event.getEventType() == null) {
-			throw new RuntimeException("Event type is null");
+		switch (event.getEventType()) {
+		case STATUS_CHANGE -> handleStatusChange(event);
+		case REGISTERED -> handleUserRegistered(event);
+		default -> throw new IllegalArgumentException("Unsupported event type: " + event.getEventType());
 		}
+	}
 
-		if (EventType.REGISTERED.equals(event.getEventType())) {
-			UserProfiles userProfiles = new UserProfiles();
-			userProfiles.setId(event.getUserId());
-			userProfiles.setCreatedAt(LocalDateTime.now());
-			userProfiles.setName(event.getUsername());
-			userProfiles.setIsActive(event.getIsActive());
-			userProfiles.setRole(event.getRole());
-			repository.save(userProfiles);
-		}
-		
-		if(EventType.STATUS_CHANGE.equals(event.getEventType())) {
-			UserProfiles user = repository.findById(event.getUserId()).orElseThrow(()-> new UserNotFoundException("User not found : "+event.getUserId()));
-			user.setUpdatedAt(LocalDateTime.now());
-			user.setIsActive(event.getIsActive());
-			repository.save(user);
-			System.err.println(event.getIsActive().equals(user.getIsActive()));
-		}
+	public void handleUserRegistered(UserEvent event) {
+		UserProfiles userProfiles = new UserProfiles();
+		userProfiles.setId(event.getUserId());
+		userProfiles.setCreatedAt(LocalDateTime.now());
+		userProfiles.setName(event.getUsername());
+		userProfiles.setIsActive(event.getIsActive());
+		userProfiles.setRole(event.getRole());
+		repository.save(userProfiles);
+	}
+
+	public void handleStatusChange(UserEvent event) {
+		UserProfiles user = repository.findById(event.getUserId())
+				.orElseThrow(() -> new UserNotFoundException("User not found : " + event.getUserId()));
+		user.setUpdatedAt(LocalDateTime.now());
+		user.setIsActive(event.getIsActive());
+		repository.save(user);
 	}
 }
