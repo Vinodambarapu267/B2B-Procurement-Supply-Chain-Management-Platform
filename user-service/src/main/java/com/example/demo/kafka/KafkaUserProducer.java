@@ -19,4 +19,8 @@ public class KafkaUserProducer {
 	public void publishUserRole(UserEvent event) {
 		kafkaTemplate.send("user-role-updated", event.getUserId().toString(), event);
 	}
+
+	public void publishUserUpdate(UserEvent event) {
+		kafkaTemplate.send("user-updated", event.getUserId().toString(), event);
+	}
 }
