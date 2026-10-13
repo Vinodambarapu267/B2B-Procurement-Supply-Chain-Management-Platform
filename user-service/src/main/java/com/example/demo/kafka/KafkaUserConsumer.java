@@ -28,6 +28,7 @@ public class KafkaUserConsumer {
 
 		if (EventType.REGISTERED.equals(event.getEventType())) {
 			UserProfiles userProfiles = new UserProfiles();
+			userProfiles.setId(event.getUserId());
 			userProfiles.setCreatedAt(LocalDateTime.now());
 			userProfiles.setName(event.getUsername());
 			userProfiles.setIsActive(event.getIsActive());
