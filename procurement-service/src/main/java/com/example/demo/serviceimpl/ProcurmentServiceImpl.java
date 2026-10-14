@@ -11,6 +11,9 @@ import com.example.demo.dto.PurchaseItem;
 import com.example.demo.entity.PurchaseRequest;
 import com.example.demo.exception.PurchaseRequestNotFoundException;
 import com.example.demo.exception.RequesterNotFoundException;
+import com.example.demo.kafka.EventType;
+import com.example.demo.kafka.KafkaPurchaseRequestProducer;
+import com.example.demo.kafka.PurchaseRequestEvent;
 import com.example.demo.repository.PurchaseRequestRepository;
 import com.example.demo.service.ProcurementService;
 import com.example.demo.utility.PurchaseStatus;
@@ -21,6 +24,7 @@ import lombok.RequiredArgsConstructor;
 @RequiredArgsConstructor
 public class ProcurmentServiceImpl implements ProcurementService {
 	private final PurchaseRequestRepository repository;
+	private final KafkaPurchaseRequestProducer kafkaPurchaseRequestProducer;
 
 	@Override
 	public PurchaseRequest createPurchaseRequest(PurchaseRequest purchaseRequest) {
@@ -34,18 +38,30 @@ public class ProcurmentServiceImpl implements ProcurementService {
 		}
 		newPurchaseRequest.setItems(items);
 		newPurchaseRequest.setTotalEstimation(totalEstimation);
-		return repository.save(newPurchaseRequest);
+		PurchaseRequest save = repository.save(newPurchaseRequest);
+
+		// Event created for kafka Producer
+		PurchaseRequestEvent event = new PurchaseRequestEvent();
+		event.setPrId(save.getPurchaseId());
+		event.setRequesterId(save.getRequesterId());
+		event.setTotalEstimation(save.getTotalEstimation());
+		event.setVersion(save.getVersion());
+		event.setStatus(save.getStatus());
+		event.setEventType(EventType.CREATED);
+		kafkaPurchaseRequestProducer.publisPurchaseRequestCreated(event);
+		return save;
 	}
 
 	@Override
 	public PurchaseRequest findByPurchaseRequestId(UUID purchaseId) {
-		return repository.findById(purchaseId).orElseThrow(() -> new PurchaseRequestNotFoundException("This PR Not found"));
+		return repository.findById(purchaseId)
+				.orElseThrow(() -> new PurchaseRequestNotFoundException("This PR Not found"));
 	}
 
 	@Override
 	public List<PurchaseRequest> findAllPurchaseRequest(UUID requesterId) {
 		List<PurchaseRequest> list = repository.findByrequesterId(requesterId);
-		if(list.isEmpty()) {
+		if (list.isEmpty()) {
 			throw new RequesterNotFoundException("No Purchase Request Found");
 		}
 		return list;
