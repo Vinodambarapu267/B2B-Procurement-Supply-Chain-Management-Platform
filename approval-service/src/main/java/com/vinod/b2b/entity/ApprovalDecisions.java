@@ -27,7 +27,6 @@ public class ApprovalDecisions {
 	private UUID id;
 	@Column(nullable = false)
 	private UUID prId;
-	@Column(nullable = false)
 	private UUID approverId;
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
