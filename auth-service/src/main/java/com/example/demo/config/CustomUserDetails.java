@@ -3,6 +3,7 @@ package com.example.demo.config;
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -19,7 +20,10 @@ public class CustomUserDetails implements UserDetails {
 	public CustomUserDetails(Users users) {
 		this.username = users.getUsername();
 		this.password = users.getPassword();
-		this.authorities = List.of(users.getRole().name().split(",")).stream().map(SimpleGrantedAuthority::new)
+
+		this.authorities = Stream.concat(Stream.of(new SimpleGrantedAuthority("ROLE_" + users.getRole().name())),
+						users.getRole().getPermissions().stream()
+								.map(permission -> new SimpleGrantedAuthority(permission.name())))
 				.collect(Collectors.toList());
 	}
 
