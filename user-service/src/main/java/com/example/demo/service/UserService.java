@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import java.util.UUID;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.dto.UserProfileDto;
@@ -11,7 +12,7 @@ import com.example.demo.entity.UserProfiles;
 public interface UserService {
 	UserProfiles createUser(UserProfiles user);
 
-	UserProfiles updateUser(UUID id, UserProfileDto profileDto);
+	UserProfiles updateUser(UserProfileDto profileDto, Authentication authentication);
 
 	UserProfiles updateUserRole(UUID id, String role);
 

@@ -4,6 +4,7 @@ import java.net.HttpURLConnection;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -40,9 +41,9 @@ public class UserController {
 				"userProfile creating failed"));
 	}
 
-	@PutMapping("/updateuser/{id}")
-	public ResponseEntity<?> updateUser(@PathVariable UUID id, @RequestBody UserProfileDto profileDto) {
-		UserProfiles userProfile = userService.updateUser(id, profileDto);
+	@PutMapping("/updateuser/me")
+	public ResponseEntity<?> updateUser(@RequestBody UserProfileDto profileDto, Authentication authentication) {
+		UserProfiles userProfile = userService.updateUser(profileDto, authentication);
 		if (userProfile != null) {
 			return ResponseEntity.ok(new ResponseMessage<>(HttpURLConnection.HTTP_ACCEPTED,
 					ResponseStatus.SUCCESS.name(), "userProfile updated Successfully", userProfile));
