@@ -16,11 +16,13 @@ public class RouteValidator {
 
     private static final List<String> OPEN_GET_ENDPOINTS = List.of(
             "/actuator/**",
-            "/api/v1/auth/**"
+            "/api/v1/auth/**",
+            "/api/v1/user/**"
     );
 
     private static final List<String> OPEN_POST_ENDPOINTS = List.of(
-          "/api/v1/auth/**"
+          "/api/v1/auth/**",
+          "/api/v1/user/**"
     );
 
     public final Predicate<ServerHttpRequest> isSecured = request -> {
