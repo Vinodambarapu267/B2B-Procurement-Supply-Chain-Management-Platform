@@ -33,9 +33,11 @@ public class AuthConfig {
 
 		http.csrf(csrf -> csrf.disable())
 				.authorizeHttpRequests(auth -> auth
-						.requestMatchers("/api/v1/auth/register", "/api/v1/auth/token", "/api/v1/auth/validate",
-								"/api/v1/auth/login", "/api/v1/auth/{userId}/status")
-						.permitAll().anyRequest().authenticated());
+						.requestMatchers("/api/v1/auth/register", 
+								"/api/v1/auth/token", 
+								"/api/v1/auth/validate",
+								"/api/v1/auth/login"
+								).permitAll().anyRequest().authenticated());
 		return http.build();
 	}
 
