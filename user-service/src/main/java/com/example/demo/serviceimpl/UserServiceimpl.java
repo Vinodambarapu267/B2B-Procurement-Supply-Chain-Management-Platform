@@ -1,8 +1,12 @@
 package com.example.demo.serviceimpl;
 
+import java.nio.file.AccessDeniedException;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -26,6 +30,32 @@ public class UserServiceimpl implements UserService {
 	private final UserProfilesRepository repository;
 	private final KafkaUserProducer kafkaUserProducer;
 
+	private Set<String> authorities(Authentication authentication) {
+		if (authentication == null) {
+			return Set.of();
+		}
+		return authentication.getAuthorities().stream().map(a -> a.getAuthority()).collect(Collectors.toSet());
+	}
+
+	private boolean has(Set<String> authorities, String permission) {
+		return authorities.contains(permission);
+	}
+
+	private void requirePermission(Set<String> authorities, String permission) throws AccessDeniedException {
+		if (!has(authorities, permission)) {
+			throw new AccessDeniedException("Missing permission: " + permission);
+		}
+	}
+
+	private UUID resolveUserId(String username) {
+		UserProfiles user = findByName(username);
+
+		if (user == null || user.getId() == null) {
+			throw new UserNotFoundException("User Not found by username: " + username);
+		}
+		return user.getId();
+	}
+
 	@Override
 	public UserProfiles createUser(UserProfiles user) {
 		repository.findByNameAndRole(user.getName(), user.getRole()).ifPresent(users -> {
@@ -43,9 +73,10 @@ public class UserServiceimpl implements UserService {
 
 	@Override
 	@Transactional
-	public UserProfiles updateUser(UUID id, UserProfileDto profileDto) {
-		UserProfiles existedUser = repository.findById(id)
-				.orElseThrow(() -> new UserNotFoundException("User not Found" + id));
+	public UserProfiles updateUser(UserProfileDto profileDto, Authentication authentication) {
+		UUID userId = resolveUserId(authentication.getName());
+		UserProfiles existedUser = repository.findById(userId)
+				.orElseThrow(() -> new UserNotFoundException("User not Found : " + userId));
 		existedUser.setName(profileDto.getName());
 		existedUser.setDepartment(profileDto.getDepartment());
 		existedUser.setJobTitle(profileDto.getJobTitle());
