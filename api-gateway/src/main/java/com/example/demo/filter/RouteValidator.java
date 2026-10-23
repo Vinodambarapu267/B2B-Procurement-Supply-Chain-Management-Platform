@@ -1,3 +1,4 @@
+
 package com.example.demo.filter;
 
 import java.util.List;
@@ -11,23 +12,29 @@ import org.springframework.util.AntPathMatcher;
 @Component
 public class RouteValidator {
 
-	private static final AntPathMatcher pathMatcher = new AntPathMatcher();
+    private static final AntPathMatcher PATH_MATCHER = new AntPathMatcher();
 
-	private static final List<String> OPEN_GET_ENDPOINTS = List.of("/acutators/**");
+    private static final List<String> OPEN_GET_ENDPOINTS = List.of(
+            "/actuator/**",
+            "/api/v1/auth/**"
+    );
 
-	private static final List<String> OPEN_POST_ENDPOINTS = List.of(
+    private static final List<String> OPEN_POST_ENDPOINTS = List.of(
+          "/api/v1/auth/**"
+    );
 
-	);
+    public final Predicate<ServerHttpRequest> isSecured = request -> {
+        String path = request.getURI().getPath();
+        HttpMethod method = request.getMethod();
 
-	public Predicate<ServerHttpRequest> isSecured = request -> {
-		String path = request.getURI().getPath();
-		HttpMethod method = request.getMethod();
+        boolean isOpenGet = HttpMethod.GET.equals(method)
+                && OPEN_GET_ENDPOINTS.stream()
+                    .anyMatch(pattern -> PATH_MATCHER.match(pattern, path));
 
-		boolean isOpenGet = HttpMethod.GET.equals(method)
-				&& OPEN_GET_ENDPOINTS.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
+        boolean isOpenPost = HttpMethod.POST.equals(method)
+                && OPEN_POST_ENDPOINTS.stream()
+                    .anyMatch(pattern -> PATH_MATCHER.match(pattern, path));
 
-		boolean isOpenPost = HttpMethod.POST.equals(method)
-				&& OPEN_POST_ENDPOINTS.stream().anyMatch(pattern -> pathMatcher.match(pattern, path));
-		return !(isOpenGet || isOpenPost);
-	};
+        return !(isOpenGet || isOpenPost);
+    };
 }
