@@ -7,6 +7,7 @@ public enum Permission {
     USER_SEARCH,
     USER_UPDATE_SELF,
     USER_UPDATE_ANY,
+    USER_DELETE_ANY,
     USER_MANAGE_ROLE_STATUS_MANAGER,
 
 
