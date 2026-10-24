@@ -4,6 +4,7 @@ import java.net.HttpURLConnection;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
@@ -53,6 +54,7 @@ public class UserController {
 	}
 
 	@PatchMapping("/{id}/role")
+	@PreAuthorize("hasAuthority('USER_UPDATE_ANY')")
 	public ResponseEntity<?> updateUserRole(@PathVariable UUID id, @RequestParam String role) {
 		UserProfiles updateUserRole = userService.updateUserRole(id, role);
 		if (updateUserRole != null) {
@@ -69,6 +71,7 @@ public class UserController {
 	}
 
 	@DeleteMapping("/deleteUser/{name}")
+	@PreAuthorize("hasAuthority('USER_DELETE_ANY')")
 	public String deleteUser(@PathVariable String name) {
 		return userService.deleteUser(name);
 	}
