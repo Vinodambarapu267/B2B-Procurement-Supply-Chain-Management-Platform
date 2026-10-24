@@ -14,10 +14,10 @@ public interface ProcurementService {
 
 	PurchaseRequest createPurchaseRequest(PurchaseRequest purchaseRequest, Authentication authentication);
 
-	PurchaseRequest findByPurchaseRequestId(UUID purchaseId);
+	PurchaseRequest findByPurchaseRequestId(UUID purchaseId, Authentication authentication);
 
 	List<PurchaseRequest> findAllPurchaseRequest(UUID requesterId);
 
-	String updateStatus(UUID purchaseId,PurchaseStatus status);
+	String updateStatus(UUID purchaseId, PurchaseStatus status);
 
 }

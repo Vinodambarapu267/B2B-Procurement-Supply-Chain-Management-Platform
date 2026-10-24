@@ -1,12 +1,12 @@
 package com.example.demo.serviceimpl;
 
-import java.nio.file.AccessDeniedException;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -43,7 +43,7 @@ public class ProcurmentServiceImpl implements ProcurementService {
 		return authorities.contains(permission);
 	}
 
-	private void requirePermission(Set<String> authorities, String permission) throws AccessDeniedException {
+	private void requirePermission(Set<String> authorities, String permission) {
 		if (!has(authorities, permission)) {
 			throw new AccessDeniedException("Missing permission: " + permission);
 		}
@@ -88,9 +88,20 @@ public class ProcurmentServiceImpl implements ProcurementService {
 	}
 
 	@Override
-	public PurchaseRequest findByPurchaseRequestId(UUID purchaseId) {
-		return repository.findById(purchaseId)
+	public PurchaseRequest findByPurchaseRequestId(UUID purchaseId, Authentication authentication) {
+		PurchaseRequest request = repository.findById(purchaseId)
 				.orElseThrow(() -> new PurchaseRequestNotFoundException("This PR Not found"));
+		Set<String> permissions = authorities(authentication);
+
+		if (has(permissions, "PURCHASE_REQUEST_READ")) {
+			return request;
+		}
+		UUID userId = resolveUserId(authentication.getName());
+		if (userId.equals(request.getRequesterId()) && has(permissions, "PURCHASE_REQUEST_READ_OWN")) {
+			return request;
+		}
+
+		throw new AccessDeniedException("You do not have permission to view this purchase request");
 	}
 
 	@Override
