@@ -117,14 +117,33 @@ public class ProcurmentServiceImpl implements ProcurementService {
 	@Override
 	@Transactional
 	@Modifying
-	public String updateStatus(UUID purchaseId, PurchaseStatus status) {
+	public String cancelPurchaseRequest(UUID purchaseId, Authentication authentication) {
 		PurchaseRequest purchaseRequest = repository.findById(purchaseId)
 				.orElseThrow(() -> new PurchaseRequestNotFoundException("This PR Not found"));
-		purchaseRequest.setStatus(status);
-		Integer version = purchaseRequest.getVersion() + 1;
-		purchaseRequest.setVersion(version);
-		repository.save(purchaseRequest);
-		return "UPdated status to " + status;
+
+		UUID requesterId = resolveUserId(authentication.getName());
+		Set<String> permissions = authorities(authentication);
+		boolean isOwner = requesterId.equals(purchaseRequest.getRequesterId());
+		boolean isAdmin = has(permissions, "PURCHASE_REQUEST_CANCEL_ANY");
+		if (!isOwner && !isAdmin) {
+			throw new AccessDeniedException("You don't have permission to cancel this purchase request");
+		}
+		PurchaseStatus status = purchaseRequest.getStatus();
+	
+		// cannnot cancel in terminal state
+		if (status == PurchaseStatus.APPROVED || status == PurchaseStatus.COMPLETED
+				|| status == PurchaseStatus.PO_GENERATED) {
+
+			throw new IllegalStateException("You cannot cancel a purchase request in this status");
+		}
+
+		// if status is already cancelled
+		if (status == PurchaseStatus.CANCELLED) {
+			throw new IllegalStateException("Purchase request is already cancelled");
+		}
+
+		purchaseRequest.setStatus(PurchaseStatus.CANCELLED);
+		return "purchase requeest cancelled successfully";
 	}
 
 }

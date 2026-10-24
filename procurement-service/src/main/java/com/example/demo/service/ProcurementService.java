@@ -7,7 +7,6 @@ import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import com.example.demo.entity.PurchaseRequest;
-import com.example.demo.utility.PurchaseStatus;
 
 @Service
 public interface ProcurementService {
@@ -18,6 +17,6 @@ public interface ProcurementService {
 
 	List<PurchaseRequest> findAllPurchaseRequest(Authentication authentication);
 
-	String updateStatus(UUID purchaseId, PurchaseStatus status);
+	String cancelPurchaseRequest(UUID purchaseId, Authentication authentication );
 
 }

@@ -70,8 +70,8 @@ public class ProcurementController {
 				.data(allPurchaseRequest).build());
 	}
 
-	@PatchMapping("/{id}/status")
-	public String updateStatus(@PathVariable UUID id, @RequestParam PurchaseStatus status) {
-		return procurementService.updateStatus(id, status);
+	@PatchMapping("/{id}/cancel")
+	public String cancelPurchaseRequest(@PathVariable UUID id, Authentication authentication) {
+		return procurementService.cancelPurchaseRequest(id, authentication);
 	}
 }
