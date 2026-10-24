@@ -1,16 +1,22 @@
 package com.example.demo.serviceimpl;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import org.springframework.data.jpa.repository.Modifying;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.example.demo.dto.PurchaseItem;
+import com.example.demo.dto.UserDto;
 import com.example.demo.entity.PurchaseRequest;
 import com.example.demo.exception.PurchaseRequestNotFoundException;
 import com.example.demo.exception.RequesterNotFoundException;
+import com.example.demo.feignclient.UserServiceFeignClient;
 import com.example.demo.kafka.EventType;
 import com.example.demo.kafka.KafkaPurchaseRequestProducer;
 import com.example.demo.kafka.PurchaseRequestEvent;
@@ -25,14 +31,43 @@ import lombok.RequiredArgsConstructor;
 public class ProcurmentServiceImpl implements ProcurementService {
 	private final PurchaseRequestRepository repository;
 	private final KafkaPurchaseRequestProducer kafkaPurchaseRequestProducer;
+	private final UserServiceFeignClient feignClient;
+
+	private Set<String> authorities(Authentication authentication) {
+		if (authentication == null)
+			return Set.of();
+		return authentication.getAuthorities().stream().map(a -> a.getAuthority()).collect(Collectors.toSet());
+	}
+
+	private boolean has(Set<String> authorities, String permission) {
+		return authorities.contains(permission);
+	}
+
+	private void requirePermission(Set<String> authorities, String permission) throws AccessDeniedException {
+		if (!has(authorities, permission)) {
+			throw new AccessDeniedException("Missing permission: " + permission);
+		}
+	}
+
+	private UUID resolveUserId(String username) {
+		UserDto user = feignClient.findByName(username);
+		if (user == null || user.getUserId() == null) {
+			throw new RuntimeException("User Not found by username: " + username);
+		}
+		return user.getUserId();
+	}
 
 	@Override
-	public PurchaseRequest createPurchaseRequest(PurchaseRequest purchaseRequest) {
+	public PurchaseRequest createPurchaseRequest(PurchaseRequest purchaseRequest, Authentication authentication) {
+		UUID requesterId = resolveUserId(authentication.getName());
 		PurchaseRequest newPurchaseRequest = new PurchaseRequest();
-		newPurchaseRequest.setRequesterId(purchaseRequest.getRequesterId());
+		newPurchaseRequest.setRequesterId(requesterId);
 		newPurchaseRequest.setStatus(purchaseRequest.getStatus());
 		Double totalEstimation = 0.0;
 		List<PurchaseItem> items = purchaseRequest.getItems();
+		if (items == null || items.isEmpty()) {
+			throw new IllegalArgumentException("Purchase request must contain atleast one item");
+		}
 		for (PurchaseItem item : items) {
 			totalEstimation += item.getUnitPrice() * item.getQuantity();
 		}
