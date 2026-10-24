@@ -16,7 +16,7 @@ public interface ProcurementService {
 
 	PurchaseRequest findByPurchaseRequestId(UUID purchaseId, Authentication authentication);
 
-	List<PurchaseRequest> findAllPurchaseRequest(UUID requesterId);
+	List<PurchaseRequest> findAllPurchaseRequest(Authentication authentication);
 
 	String updateStatus(UUID purchaseId, PurchaseStatus status);
 

@@ -105,7 +105,8 @@ public class ProcurmentServiceImpl implements ProcurementService {
 	}
 
 	@Override
-	public List<PurchaseRequest> findAllPurchaseRequest(UUID requesterId) {
+	public List<PurchaseRequest> findAllPurchaseRequest(Authentication authentication) {
+		UUID requesterId = resolveUserId(authentication.getName());
 		List<PurchaseRequest> list = repository.findByrequesterId(requesterId);
 		if (list.isEmpty()) {
 			throw new RequesterNotFoundException("No Purchase Request Found");
