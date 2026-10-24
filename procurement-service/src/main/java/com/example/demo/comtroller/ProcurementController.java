@@ -46,8 +46,9 @@ public class ProcurementController {
 	}
 
 	@GetMapping("/{purchaseId}")
-	public ResponseEntity<?> findBypruchaseId(@PathVariable UUID purchaseId) {
-		PurchaseRequest purchaseRequest = procurementService.findByPurchaseRequestId(purchaseId);
+	@PreAuthorize("hasRole('ADMIN')or hasAuthority('PURCHASE_REQUEST_READ')")
+	public ResponseEntity<?> findBypruchaseId(@PathVariable UUID purchaseId, Authentication authentication) {
+		PurchaseRequest purchaseRequest = procurementService.findByPurchaseRequestId(purchaseId, authentication);
 		if (purchaseRequest == null) {
 			return ResponseEntity.ok(ResponseMessage.builder().statuscode(HttpURLConnection.HTTP_NOT_FOUND)
 					.status(ResponseStatus.FAILURE.name()).message("Purchase Request retrived failed..").build());
