@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.dto.UserDto;
 import com.example.demo.dto.UserProfileDto;
 import com.example.demo.entity.UserProfiles;
 import com.example.demo.service.UserService;
@@ -77,14 +78,12 @@ public class UserController {
 	}
 
 	@GetMapping("/{name}")
-	public ResponseEntity<?> findByName(@PathVariable String name) {
+	public UserDto findByName(@PathVariable String name) {
 		UserProfiles userProfile = userService.findByName(name);
-		if (userProfile != null) {
-			return ResponseEntity.ok(new ResponseMessage<>(HttpURLConnection.HTTP_OK, ResponseStatus.SUCCESS.name(),
-					"userRole updated Successfully", userProfile));
-		}
-		return ResponseEntity.ok(new ResponseMessage<>(HttpURLConnection.HTTP_NOT_FOUND, ResponseStatus.FAILURE.name(),
-				"User Role update failed"));
+		UserDto userDto = new UserDto();
+		userDto.setUserId(userProfile.getId());
+		userDto.setUsername(userProfile.getName());
+		return userDto;
 	}
 
 }
