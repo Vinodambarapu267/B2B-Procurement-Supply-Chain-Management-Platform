@@ -58,9 +58,9 @@ public class ProcurementController {
 				.data(purchaseRequest).build());
 	}
 
-	@GetMapping("/{requesterId}/all")
-	public ResponseEntity<?> findAllPurchaseRequest(@PathVariable UUID requesterId) {
-		List<PurchaseRequest> allPurchaseRequest = procurementService.findAllPurchaseRequest(requesterId);
+	@GetMapping
+	public ResponseEntity<?> findAllPurchaseRequest(Authentication authentication) {
+		List<PurchaseRequest> allPurchaseRequest = procurementService.findAllPurchaseRequest(authentication);
 		if (allPurchaseRequest == null) {
 			return ResponseEntity.ok(ResponseMessage.builder().statuscode(HttpURLConnection.HTTP_NOT_FOUND)
 					.status(ResponseStatus.FAILURE.name()).message("All Purchase Request retrived failed..").build());
