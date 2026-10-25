@@ -3,6 +3,7 @@ package com.example.demo.service;
 import java.util.UUID;
 
 import org.apache.kafka.common.message.ApiVersionsResponseData.FinalizedFeatureKey;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.config.annotation.method.configuration.EnableMethodSecurity;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
@@ -72,20 +73,16 @@ public class AuthService {
 	}
 
 	@Transactional
+	@PreAuthorize("hasAuthority('USER_MANAGE_ROLE_STATUS_MANAGER')")
 	public UserDto updateStatus(UUID userId) {
 		Users user = repository.findById(userId)
 				.orElseThrow(() -> new UserNotFoundException("User not found : " + userId));
 		user.setIs_active(!user.getIs_active());
 		Users updatedUser = repository.save(user);
-		
-	kafkaUserProducer.publishUserStatusChange(UserEvent.builder()
-			.userId(updatedUser.getId())
-			.username(updatedUser.getUsername())
-			.role(updatedUser.getRole())
-			.isActive(updatedUser.getIs_active())
-			.eventType(EventType.STATUS_CHANGE)
-			.build()
-			);
+
+		kafkaUserProducer.publishUserStatusChange(UserEvent.builder().userId(updatedUser.getId())
+				.username(updatedUser.getUsername()).role(updatedUser.getRole()).isActive(updatedUser.getIs_active())
+				.eventType(EventType.STATUS_CHANGE).build());
 		return UserDto.builder().status(updatedUser.getIs_active()).userId(updatedUser.getId())
 				.role(updatedUser.getRole()).username(updatedUser.getUsername()).build();
 	}

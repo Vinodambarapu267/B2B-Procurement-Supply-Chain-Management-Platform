@@ -4,6 +4,8 @@ import java.net.HttpURLConnection;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -15,6 +17,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.example.demo.dto.UserDto;
 import com.example.demo.dto.UserProfileDto;
 import com.example.demo.entity.UserProfiles;
 import com.example.demo.service.UserService;
@@ -40,9 +43,9 @@ public class UserController {
 				"userProfile creating failed"));
 	}
 
-	@PutMapping("/updateuser/{id}")
-	public ResponseEntity<?> updateUser(@PathVariable UUID id, @RequestBody UserProfileDto profileDto) {
-		UserProfiles userProfile = userService.updateUser(id, profileDto);
+	@PutMapping("/updateuser/me")
+	public ResponseEntity<?> updateUser(@RequestBody UserProfileDto profileDto, Authentication authentication) {
+		UserProfiles userProfile = userService.updateUser(profileDto, authentication);
 		if (userProfile != null) {
 			return ResponseEntity.ok(new ResponseMessage<>(HttpURLConnection.HTTP_ACCEPTED,
 					ResponseStatus.SUCCESS.name(), "userProfile updated Successfully", userProfile));
@@ -52,6 +55,7 @@ public class UserController {
 	}
 
 	@PatchMapping("/{id}/role")
+	@PreAuthorize("hasAuthority('USER_UPDATE_ANY')")
 	public ResponseEntity<?> updateUserRole(@PathVariable UUID id, @RequestParam String role) {
 		UserProfiles updateUserRole = userService.updateUserRole(id, role);
 		if (updateUserRole != null) {
@@ -68,19 +72,18 @@ public class UserController {
 	}
 
 	@DeleteMapping("/deleteUser/{name}")
+	@PreAuthorize("hasAuthority('USER_DELETE_ANY')")
 	public String deleteUser(@PathVariable String name) {
 		return userService.deleteUser(name);
 	}
 
 	@GetMapping("/{name}")
-	public ResponseEntity<?> findByName(@PathVariable String name) {
+	public UserDto findByName(@PathVariable String name) {
 		UserProfiles userProfile = userService.findByName(name);
-		if (userProfile != null) {
-			return ResponseEntity.ok(new ResponseMessage<>(HttpURLConnection.HTTP_OK, ResponseStatus.SUCCESS.name(),
-					"userRole updated Successfully", userProfile));
-		}
-		return ResponseEntity.ok(new ResponseMessage<>(HttpURLConnection.HTTP_NOT_FOUND, ResponseStatus.FAILURE.name(),
-				"User Role update failed"));
+		UserDto userDto = new UserDto();
+		userDto.setUserId(userProfile.getId());
+		userDto.setUsername(userProfile.getName());
+		return userDto;
 	}
 
 }
