@@ -1,6 +1,5 @@
 package com.vinod.b2b.serviceImpl;
 
-
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
@@ -8,6 +7,7 @@ import java.util.stream.Collectors;
 
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.GrantedAuthority;
 import org.springframework.stereotype.Service;
 
 import com.vinod.b2b.dto.ApprovalDecisionDto;
@@ -18,6 +18,7 @@ import com.vinod.b2b.exceptions.PurchaseRequestNotFoundException;
 import com.vinod.b2b.feignclients.UserServiceFeignClient;
 import com.vinod.b2b.repository.ApprovalRepository;
 import com.vinod.b2b.service.ApprovalService;
+import com.vinod.b2b.utility.ApprovalLevel;
 
 import lombok.RequiredArgsConstructor;
 
@@ -43,6 +44,26 @@ public class ApprovalServiceImpl implements ApprovalService {
 		}
 	}
 
+	private ApprovalLevel getCurrentRole(Authentication authentication) {
+		if (authentication == null) {
+			throw new AccessDeniedException("User is not authenticated");
+		}
+
+		String role = authentication.getAuthorities()
+				.stream()
+				.map(GrantedAuthority::getAuthority)
+				.filter(authority -> authority.startsWith("ROLE_"))
+				.map(authority -> authority.substring(5))
+				.findFirst()
+				.orElseThrow(() -> new AccessDeniedException("No role found for user"));
+
+		try {
+			return ApprovalLevel.valueOf(role);
+		} catch (IllegalArgumentException e) {
+			throw new AccessDeniedException("User role does not match an ApprovalLevel");
+		}
+	}
+
 	private UUID resolveUserId(String username) {
 		UserDto user = feignClient.findByName(username);
 		if (user == null || user.getUserId() == null) {
@@ -52,12 +73,21 @@ public class ApprovalServiceImpl implements ApprovalService {
 	}
 
 	@Override
-	public ApprovalDecisions addApporvalDecision(UUID prId, ApprovalDecisionDto approvalDecisionDto) {
+	public ApprovalDecisions addApporvalDecision(UUID prId, ApprovalDecisionDto approvalDecisionDto,
+			Authentication authentication) {
+		Set<String> permission = authorities(authentication);
+		if (!has(permission, "APPROVAL_DECIDE")) {
+			throw new AccessDeniedException("You Don't permission to make approve");
+		}
+
+		ApprovalLevel currentRole = getCurrentRole(authentication);
+
+		UUID approverId = resolveUserId(authentication.getName());
 		ApprovalDecisions approvaDecisions = new ApprovalDecisions();
 		approvaDecisions.setPrId(prId);
-		approvaDecisions.setApproverId(approvalDecisionDto.getApproverId());
+		approvaDecisions.setApproverId(approverId);
 		approvaDecisions.setDecision(approvalDecisionDto.getDecision());
-		approvaDecisions.setLevel(approvalDecisionDto.getLevel());
+		approvaDecisions.setLevel(currentRole);
 		approvaDecisions.setReason(approvalDecisionDto.getReason());
 		return repository.save(approvaDecisions);
 
