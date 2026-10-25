@@ -17,12 +17,18 @@ public class RouteValidator {
     private static final List<String> OPEN_GET_ENDPOINTS = List.of(
             "/actuator/**",
             "/api/v1/auth/**",
-            "/api/v1/user/**"
+            "/api/v1/user/**",
+            "/api/v1/purchase-requests/**"
+            ,"/api/v1/appprovals/**"
+
     );
 
     private static final List<String> OPEN_POST_ENDPOINTS = List.of(
           "/api/v1/auth/**",
-          "/api/v1/user/**"
+          "/api/v1/user/**",
+          "/api/v1/purchase-requests/**",
+          "/api/v1/appprovals/**"
+
     );
 
     public final Predicate<ServerHttpRequest> isSecured = request -> {
