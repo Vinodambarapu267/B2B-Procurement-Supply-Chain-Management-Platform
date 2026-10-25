@@ -26,7 +26,7 @@ public class RouteValidator {
           "/api/v1/auth/**",
           "/api/v1/user/**",
           "/api/v1/purchase-requests/**",
-          "/api/v1/appprovals/**
+          "/api/v1/appprovals/**"
     );
 
 	public final Predicate<ServerHttpRequest> isSecured = request -> {
