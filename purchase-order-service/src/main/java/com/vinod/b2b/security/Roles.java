@@ -59,6 +59,7 @@ public enum Roles {
 			Permission.APPROVAL_DECIDE, 
 			Permission.APPROVAL_HISTORY_READ,
 			Permission.APPROVAL_HISTORY_READ_OWN,
+			Permission.PURCHASE_ORDER_READ,
 			Permission.PURCHASE_ORDER_CREATE, 
 			Permission.PURCHASE_ORDER_SEND, 
 			Permission.PURCHASE_ORDER_COMPLETE,
@@ -90,6 +91,7 @@ public enum Roles {
 	SUPPLIER(Set.of(
 			Permission.USER_READ_SELF, 
 			Permission.USER_UPDATE_SELF,
+			
 			Permission.SUPPLIER_PROFILE_READ_OWN, 
 			Permission.SUPPLIER_PROFILE_UPDATE_OWN,
 			Permission.PURCHASE_ORDER_READ_ASSIGNED,
@@ -102,6 +104,7 @@ public enum Roles {
 			Permission.USER_UPDATE_SELF,
 			Permission.PURCHASE_REQUEST_READ, 
 			Permission.PURCHASE_REQUEST_READ_OWN,
+			Permission.PURCHASE_ORDER_READ,
 			Permission.APPROVAL_HISTORY_READ, 
 			Permission.APPROVAL_HISTORY_READ_OWN,
 			Permission.REPORT_SPEND_VIEW, 
