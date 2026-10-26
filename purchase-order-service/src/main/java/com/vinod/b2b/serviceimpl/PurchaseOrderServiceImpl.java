@@ -73,9 +73,23 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 	}
 
 	@Override
-	public PurchaseOrders getPurchaseOrder(UUID purchaseOrderId) {
-		return repository.findById(purchaseOrderId).orElseThrow(
+	public PurchaseOrders getPurchaseOrder(UUID purchaseOrderId, Authentication authentication) {
+		UUID supplierId = resolveUserId(authentication.getName());
+		Set<String> permissions = authorities(authentication);
+		PurchaseOrders order = repository.findById(purchaseOrderId).orElseThrow(
 				() -> new PurchaseOrderNotFoundException("PurchaseOrder not found ID : " + purchaseOrderId));
+
+		if (permissions.contains("PURCHASE_ORDER_READ")) {
+			return order;
+
+		}
+		if (permissions.contains("PURCHASE_ORDER_READ_ASSIGNED")) {
+			if (order.getSupplierId().equals(supplierId)) {
+				return order;
+			}
+		}
+		throw new AccessDeniedException("You don't have pemission to view this purchase order");
+
 	}
 
 	private String generateRandomPONumber() {
