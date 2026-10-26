@@ -93,17 +93,10 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 	}
 
 	@Override
-	public PurchaseOrders sentPurchaseOrder(UUID purchaseOrderId, Authentication authentication) {
-		UUID supplierId = resolveUserId(authentication.getName());
-		Set<String> permissions = authorities(authentication);
-		if (!has(permissions, "PURCHASE_ORDER_SUPPLIER_ACTION")) {
-			throw new AccessDeniedException("You don't have to send this purchase order");
-		}
+	public PurchaseOrders sendPurchaseOrder(UUID purchaseOrderId) {
 		PurchaseOrders order = repository.findById(purchaseOrderId).orElseThrow(
 				() -> new PurchaseOrderNotFoundException("PurchaseOrder not found ID : " + purchaseOrderId));
-		if (!order.getSupplierId().equals(supplierId)) {
-			throw new IllegalArgumentException("You cannot send another supplier's purchase order");
-		}
+
 		if (order.getStatus() != OrderStatus.GENERATED) {
 			throw new IllegalStateException(
 					"Only generated purchase orders can be sent. Current status: " + order.getStatus());
