@@ -46,8 +46,9 @@ public class ApprovalController {
 	}
 
 	@GetMapping("/pending")
-	public ResponseEntity<?> getAllPendingPRs(@RequestParam UUID approverId) {
-		List<ApprovalDecisions> allPendingDecisions = approvalService.findAllPendingDecisions(approverId);
+	@PreAuthorize("hasAuthority('APPROVAL_PENDING_LIST')")
+	public ResponseEntity<?> getAllPendingPRs(Authentication authentication) {
+		List<ApprovalDecisions> allPendingDecisions = approvalService.findAllPendingDecisions(authentication);
 		if (allPendingDecisions == null) {
 			return ResponseEntity.ok(ResponseMessage.builder().message("Retriving pending Records failed")
 					.status(ResponseStatus.FAILED.name()).statusCode(HttpURLConnection.HTTP_NOT_FOUND).build());
