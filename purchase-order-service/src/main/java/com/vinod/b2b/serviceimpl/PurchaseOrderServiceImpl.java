@@ -156,6 +156,20 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
 	}
 
+	@Override
+	public PurchaseOrders completePurchaseOrder(UUID purchaseOrderId) {
+
+		PurchaseOrders order = repository.findById(purchaseOrderId).orElseThrow(
+				() -> new PurchaseOrderNotFoundException("PurchaseOrder not found ID : " + purchaseOrderId));
+
+		if (order.getStatus() != OrderStatus.DISPATCHED) {
+			throw new IllegalStateException(
+					"Only Accepted purchase orders can be sent. Current status: " + order.getStatus());
+		}
+		order.setStatus(OrderStatus.COMPLETED);
+		return repository.save(order);
+	}
+
 	private String generateRandomPONumber() {
 		return UUID.randomUUID().toString().toUpperCase().substring(0, 8);
 	}
