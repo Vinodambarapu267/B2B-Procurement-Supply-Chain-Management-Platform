@@ -59,8 +59,9 @@ public class PurchaseOrderController {
 	}
 
 	@GetMapping("/{id}")
-	public ResponseEntity<?> findByPurchaseOrders(@PathVariable(name = "id") UUID purchaseOrderId) {
-		PurchaseOrders purchaseOrder = purchaseOrderService.getPurchaseOrder(purchaseOrderId);
+	public ResponseEntity<?> findByPurchaseOrders(@PathVariable(name = "id") UUID purchaseOrderId,
+			Authentication authentication) {
+		PurchaseOrders purchaseOrder = purchaseOrderService.getPurchaseOrder(purchaseOrderId, authentication);
 		if (purchaseOrder == null) {
 			return ResponseEntity.ok(ResponseMessage.builder().message("PurchaseOrder retriving failed..")
 					.status(ResponseStatus.FAILED.name()).statusCode(HttpURLConnection.HTTP_BAD_REQUEST)
