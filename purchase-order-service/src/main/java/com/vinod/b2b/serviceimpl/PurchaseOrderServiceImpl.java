@@ -47,28 +47,35 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 		}
 		return user.getUserId();
 	}
+
 	@Override
-	public PurchaseOrders generatePurchaseOrder(PurchaseOrders purchaseOrders) {
+	public PurchaseOrders generatePurchaseOrder(PurchaseOrders purchaseOrders, Authentication authentication) {
+		Set<String> permissions = authorities(authentication);
+		if (!has(permissions, "PURCHASE_ORDER_CREATE")) {
+			throw new AccessDeniedException("You don't have Pemission to create purchase orders");
+		}
 		PurchaseOrders order = new PurchaseOrders();
 		order.setPrId(purchaseOrders.getPrId());
 		order.setSupplierId(purchaseOrders.getSupplierId());
 		order.setPoNumber(generateRandomPONumber());
-		order.setStatus(purchaseOrders.getStatus());
+		order.setStatus(OrderStatus.GENERATED);
 		order.setTotalAmount(purchaseOrders.getTotalAmount());
 		return repository.save(order);
 	}
 
 	@Override
-	public PurchaseOrders updatePurchaseOrderstatus(UUID purchaseOrderId,OrderStatus status) {
-		PurchaseOrders purchaseOrder = repository.findById(purchaseOrderId).orElseThrow(()-> new PurchaseOrderNotFoundException("Purchase Order not found ID : "+purchaseOrderId));
+	public PurchaseOrders updatePurchaseOrderstatus(UUID purchaseOrderId, OrderStatus status) {
+		PurchaseOrders purchaseOrder = repository.findById(purchaseOrderId).orElseThrow(
+				() -> new PurchaseOrderNotFoundException("Purchase Order not found ID : " + purchaseOrderId));
 		purchaseOrder.setStatus(status);
-		purchaseOrder.setVersion(purchaseOrder.getVersion()+1);
+		purchaseOrder.setVersion(purchaseOrder.getVersion() + 1);
 		return repository.save(purchaseOrder);
 	}
 
 	@Override
 	public PurchaseOrders getPurchaseOrder(UUID purchaseOrderId) {
-		return repository.findById(purchaseOrderId).orElseThrow(()-> new PurchaseOrderNotFoundException("PurchaseOrder not found ID : "+purchaseOrderId));
+		return repository.findById(purchaseOrderId).orElseThrow(
+				() -> new PurchaseOrderNotFoundException("PurchaseOrder not found ID : " + purchaseOrderId));
 	}
 
 	private String generateRandomPONumber() {
