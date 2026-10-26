@@ -71,6 +71,21 @@ public class PurchaseOrderController {
 				.data(acceptPurchaseOrder).build());
 	}
 
+	@PatchMapping("/{id}/dispatch")
+	@PreAuthorize("hasAuthority('PURCHASE_ORDER_SUPPLIER_ACTION')")
+	public ResponseEntity<?> dispatchPurchaseOrder(@PathVariable("id") UUID purchaseOrderId,
+			Authentication authentication) {
+		PurchaseOrders dispatchPurchaseOrder = purchaseOrderService.dispatchPurchaseOrder(purchaseOrderId,
+				authentication);
+		if (dispatchPurchaseOrder == null) {
+			return ResponseEntity.ok(ResponseMessage.builder().message("PurchaseOrder dispatch failed..")
+					.status(ResponseStatus.FAILED.name()).statusCode(HttpURLConnection.HTTP_NOT_MODIFIED).build());
+		}
+		return ResponseEntity.ok(ResponseMessage.builder().message("PurchaseOrder dispatched Successfully")
+				.status(ResponseStatus.SUCCESS.name()).statusCode(HttpURLConnection.HTTP_ACCEPTED)
+				.data(dispatchPurchaseOrder).build());
+	}
+
 	@GetMapping("/{id}")
 	public ResponseEntity<?> findByPurchaseOrders(@PathVariable(name = "id") UUID purchaseOrderId,
 			Authentication authentication) {
