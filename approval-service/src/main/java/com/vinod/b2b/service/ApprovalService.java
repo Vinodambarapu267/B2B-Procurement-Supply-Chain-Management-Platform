@@ -11,7 +11,7 @@ import com.vinod.b2b.entity.ApprovalDecisions;
 public interface ApprovalService {
 	public ApprovalDecisions addApporvalDecision(UUID prId,ApprovalDecisionDto approvalDecisionDto, Authentication authentication);
 
-	public List<ApprovalDecisions> findAllPendingDecisions(UUID approvalId);
+	public List<ApprovalDecisions> findAllPendingDecisions(Authentication authentication);
 
 	public List<ApprovalDecisions> getApprovalHistory(UUID prId);
 }

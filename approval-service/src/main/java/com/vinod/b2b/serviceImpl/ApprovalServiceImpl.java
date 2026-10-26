@@ -19,6 +19,7 @@ import com.vinod.b2b.feignclients.UserServiceFeignClient;
 import com.vinod.b2b.repository.ApprovalRepository;
 import com.vinod.b2b.service.ApprovalService;
 import com.vinod.b2b.utility.ApprovalLevel;
+import com.vinod.b2b.utility.Decision;
 
 import lombok.RequiredArgsConstructor;
 
@@ -49,12 +50,8 @@ public class ApprovalServiceImpl implements ApprovalService {
 			throw new AccessDeniedException("User is not authenticated");
 		}
 
-		String role = authentication.getAuthorities()
-				.stream()
-				.map(GrantedAuthority::getAuthority)
-				.filter(authority -> authority.startsWith("ROLE_"))
-				.map(authority -> authority.substring(5))
-				.findFirst()
+		String role = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority)
+				.filter(authority -> authority.startsWith("ROLE_")).map(authority -> authority.substring(5)).findFirst()
 				.orElseThrow(() -> new AccessDeniedException("No role found for user"));
 
 		try {
@@ -94,12 +91,15 @@ public class ApprovalServiceImpl implements ApprovalService {
 	}
 
 	@Override
-	public List<ApprovalDecisions> findAllPendingDecisions(UUID approvalId) {
-		List<ApprovalDecisions> allPendingPRs = repository.findAllByApproverId(approvalId);
-		if (allPendingPRs.isEmpty()) {
-			throw new ApproverNotFoundException("NO pending records");
+	public List<ApprovalDecisions> findAllPendingDecisions(Authentication authentication) {
+
+		Set<String> permissions = authorities(authentication);
+		if (!has(permissions, "APPROVAL_PENDING_LIST")) {
+			throw new AccessDeniedException("You don't have permission to view pending approvals");
 		}
-		return allPendingPRs;
+		UUID approverId = resolveUserId(authentication.getName());
+		return repository.findAllByApproverIdAndDecision(approverId, Decision.PENDING);
+
 	}
 
 	@Override
