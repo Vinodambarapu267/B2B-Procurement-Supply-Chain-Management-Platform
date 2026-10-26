@@ -1,7 +1,6 @@
 package com.vinod.b2b.controller;
 
 import java.net.HttpURLConnection;
-import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
@@ -13,7 +12,6 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vinod.b2b.dto.ApprovalDecisionDto;
@@ -59,6 +57,7 @@ public class ApprovalController {
 	}
 
 	@GetMapping("/{prid}/history")
+	@PreAuthorize("hasAnyAuthority('APPROVAL_HISTORY_READ', 'APPROVAL_HISTORY_READ_OWN')")
 	public ResponseEntity<?> getHistoryOfPr(@PathVariable(name = "prid") UUID prId) {
 		List<ApprovalDecisions> approvalHistory = approvalService.getApprovalHistory(prId);
 		if (approvalHistory == null) {
