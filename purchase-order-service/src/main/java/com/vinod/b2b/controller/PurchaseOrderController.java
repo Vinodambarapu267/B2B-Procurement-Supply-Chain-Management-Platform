@@ -47,15 +47,28 @@ public class PurchaseOrderController {
 	@PatchMapping("/{id}/sent")
 	public ResponseEntity<?> sentPurchaseOrder(@PathVariable(name = "id") UUID purchaseOrderId,
 			Authentication authentication) {
-		PurchaseOrders updatePurchaseOrderstatus = purchaseOrderService.sentPurchaseOrder(purchaseOrderId,
-				authentication);
-		if (updatePurchaseOrderstatus == null) {
+		PurchaseOrders sentPurchaseOrder = purchaseOrderService.sentPurchaseOrder(purchaseOrderId, authentication);
+		if (sentPurchaseOrder == null) {
 			return ResponseEntity.ok(ResponseMessage.builder().message("PurchaseOrder sent failed..")
 					.status(ResponseStatus.FAILED.name()).statusCode(HttpURLConnection.HTTP_NOT_MODIFIED).build());
 		}
 		return ResponseEntity.ok(ResponseMessage.builder().message("PurchaseOrder sent Successfully")
 				.status(ResponseStatus.SUCCESS.name()).statusCode(HttpURLConnection.HTTP_ACCEPTED)
-				.data(updatePurchaseOrderstatus).build());
+				.data(sentPurchaseOrder).build());
+	}
+
+	@PatchMapping("/{id}/accept")
+	@PreAuthorize("hasAuthority('PURCHASE_ORDER_SUPPLIER_ACTION')")
+	public ResponseEntity<?> acceptPurchaseOrder(@PathVariable("id") UUID purchaseOrderId,
+			Authentication authentication) {
+		PurchaseOrders acceptPurchaseOrder = purchaseOrderService.acceptPurchaseOrder(purchaseOrderId, authentication);
+		if (acceptPurchaseOrder == null) {
+			return ResponseEntity.ok(ResponseMessage.builder().message("PurchaseOrder accept failed..")
+					.status(ResponseStatus.FAILED.name()).statusCode(HttpURLConnection.HTTP_NOT_MODIFIED).build());
+		}
+		return ResponseEntity.ok(ResponseMessage.builder().message("PurchaseOrder accepted  Successfully")
+				.status(ResponseStatus.SUCCESS.name()).statusCode(HttpURLConnection.HTTP_ACCEPTED)
+				.data(acceptPurchaseOrder).build());
 	}
 
 	@GetMapping("/{id}")
