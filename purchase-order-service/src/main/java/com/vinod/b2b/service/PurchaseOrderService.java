@@ -17,4 +17,6 @@ public interface PurchaseOrderService {
 	PurchaseOrders getPurchaseOrder(UUID purchaseOrderId, Authentication authentication);
 
 	PurchaseOrders sentPurchaseOrder(UUID purchaseOrderId, Authentication authentication);
+
+	PurchaseOrders acceptPurchaseOrder(UUID purchaseOrderId, Authentication authentication);
 }

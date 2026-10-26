@@ -112,7 +112,33 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 		return repository.save(order);
 	}
 
+	@Override
+	public PurchaseOrders acceptPurchaseOrder(UUID purchaseOrderId, Authentication authentication) {
+		UUID supplierId = resolveUserId(authentication.getName());
+		Set<String> permissions = authorities(authentication);
+		if (!has(permissions, "PURCHASE_ORDER_SUPPLIER_ACTION")) {
+			throw new AccessDeniedException("You don't have to send this purchase order");
+		}
+		PurchaseOrders order = repository.findById(purchaseOrderId).orElseThrow(
+				() -> new PurchaseOrderNotFoundException("PurchaseOrder not found ID : " + purchaseOrderId));
+		if (!order.getSupplierId().equals(supplierId)) {
+			throw new AccessDeniedException("You cannot send another supplier's purchase order");
+		}
+		if (order.getStatus().equals(OrderStatus.ACCEPTED)) {
+			throw new IllegalArgumentException(
+					"You Already Accepted This purchase Order : " + order.getPurchaseOrderId());
+		}
+		if (order.getStatus().equals(OrderStatus.SENT)) {
+			order.setStatus(OrderStatus.ACCEPTED);
+		} else {
+			throw new IllegalStateException(
+					"Only SENT purchase orders can be accepted. Current status: " + order.getStatus());
+		}
+		return repository.save(order);
+	}
+
 	private String generateRandomPONumber() {
 		return UUID.randomUUID().toString().toUpperCase().substring(0, 8);
 	}
+
 }
