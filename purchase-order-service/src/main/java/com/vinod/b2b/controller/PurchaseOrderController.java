@@ -12,12 +12,10 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.vinod.b2b.entity.PurchaseOrders;
 import com.vinod.b2b.service.PurchaseOrderService;
-import com.vinod.b2b.utility.OrderStatus;
 import com.vinod.b2b.utility.ResponseMessage;
 import com.vinod.b2b.utility.ResponseStatus;
 
@@ -84,6 +82,19 @@ public class PurchaseOrderController {
 		return ResponseEntity.ok(ResponseMessage.builder().message("PurchaseOrder dispatched Successfully")
 				.status(ResponseStatus.SUCCESS.name()).statusCode(HttpURLConnection.HTTP_ACCEPTED)
 				.data(dispatchPurchaseOrder).build());
+	}
+
+	@PatchMapping("/{id}/complete")
+	@PreAuthorize("hasAuthority('PURCHASE_ORDER_COMPLETE')")
+	public ResponseEntity<?> completePurchaseOrder(@PathVariable("id") UUID purchaseOrderId) {
+		PurchaseOrders completePurchaseOrder = purchaseOrderService.completePurchaseOrder(purchaseOrderId);
+		if (completePurchaseOrder == null) {
+			return ResponseEntity.ok(ResponseMessage.builder().message("PurchaseOrder completing failed..")
+					.status(ResponseStatus.FAILED.name()).statusCode(HttpURLConnection.HTTP_NOT_MODIFIED).build());
+		}
+		return ResponseEntity.ok(ResponseMessage.builder().message("PurchaseOrder completed Successfully")
+				.status(ResponseStatus.SUCCESS.name()).statusCode(HttpURLConnection.HTTP_ACCEPTED)
+				.data(completePurchaseOrder).build());
 	}
 
 	@GetMapping("/{id}")

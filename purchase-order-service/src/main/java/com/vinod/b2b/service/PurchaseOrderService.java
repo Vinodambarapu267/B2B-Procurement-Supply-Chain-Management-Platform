@@ -21,4 +21,6 @@ public interface PurchaseOrderService {
 	PurchaseOrders acceptPurchaseOrder(UUID purchaseOrderId, Authentication authentication);
 
 	PurchaseOrders dispatchPurchaseOrder(UUID purchaseOrderId, Authentication authentication);
+
+	PurchaseOrders completePurchaseOrder(UUID purchaseOrderId);
 }
