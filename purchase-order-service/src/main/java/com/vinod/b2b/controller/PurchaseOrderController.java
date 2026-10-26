@@ -44,16 +44,16 @@ public class PurchaseOrderController {
 
 	}
 
-	@PatchMapping("/{id}/status")
-	public ResponseEntity<?> updatePurchaseOrderStatus(@PathVariable(name = "id") UUID purchaseOrderId,
-			@RequestParam OrderStatus status) {
-		PurchaseOrders updatePurchaseOrderstatus = purchaseOrderService.updatePurchaseOrderstatus(purchaseOrderId,
-				status);
+	@PatchMapping("/{id}/sent")
+	public ResponseEntity<?> sentPurchaseOrder(@PathVariable(name = "id") UUID purchaseOrderId,
+			Authentication authentication) {
+		PurchaseOrders updatePurchaseOrderstatus = purchaseOrderService.sentPurchaseOrder(purchaseOrderId,
+				authentication);
 		if (updatePurchaseOrderstatus == null) {
-			return ResponseEntity.ok(ResponseMessage.builder().message("PurchaseOrder update status failed..")
+			return ResponseEntity.ok(ResponseMessage.builder().message("PurchaseOrder sent failed..")
 					.status(ResponseStatus.FAILED.name()).statusCode(HttpURLConnection.HTTP_NOT_MODIFIED).build());
 		}
-		return ResponseEntity.ok(ResponseMessage.builder().message("PurchaseOrder status updated Successfully")
+		return ResponseEntity.ok(ResponseMessage.builder().message("PurchaseOrder sent Successfully")
 				.status(ResponseStatus.SUCCESS.name()).statusCode(HttpURLConnection.HTTP_ACCEPTED)
 				.data(updatePurchaseOrderstatus).build());
 	}

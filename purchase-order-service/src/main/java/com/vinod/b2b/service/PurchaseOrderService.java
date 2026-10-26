@@ -10,9 +10,11 @@ import com.vinod.b2b.utility.OrderStatus;
 
 @Service
 public interface PurchaseOrderService {
-	PurchaseOrders generatePurchaseOrder(PurchaseOrders purchaseOrders,Authentication authentication);
+	PurchaseOrders generatePurchaseOrder(PurchaseOrders purchaseOrders, Authentication authentication);
 
-	PurchaseOrders updatePurchaseOrderstatus(UUID purchaseOrderId,OrderStatus status);
+	PurchaseOrders updatePurchaseOrderstatus(UUID purchaseOrderId, OrderStatus status);
 
 	PurchaseOrders getPurchaseOrder(UUID purchaseOrderId, Authentication authentication);
+
+	PurchaseOrders sentPurchaseOrder(UUID purchaseOrderId, Authentication authentication);
 }
