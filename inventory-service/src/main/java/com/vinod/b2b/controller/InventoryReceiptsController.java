@@ -56,6 +56,7 @@ public class InventoryReceiptsController {
 	}
 
 	@GetMapping("/{id}")
+	@PreAuthorize("hasAuthority('INVENTORY_RECEIPTS_VIEW')")
 	public ResponseEntity<?> getInventoryReceiptById(@PathVariable UUID id) {
 		 InventoryReceipt inventoryReceipt = inventoryReceiptsService.getInventoryReceiptById(id);
 		 if (inventoryReceipt == null) {
@@ -81,6 +82,7 @@ public class InventoryReceiptsController {
 	}
 
 	@GetMapping("/discrepancies")
+	@PreAuthorize("hasAuthority('INVENTORY_DISCREPANCY_REVIEW')")
 	public ResponseEntity<?> getListOfDiscrepancies() {
 		 List<InventoryReceipt> allDiscrepancies = inventoryReceiptsService.getAllDiscrepancies();
 		 if (allDiscrepancies == null) {
