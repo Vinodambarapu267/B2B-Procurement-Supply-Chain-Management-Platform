@@ -21,7 +21,7 @@ public class RouteValidator {
             "/api/v1/purchase-requests/**"
             ,"/api/v1/appprovals/**",
             "/api/v1/suppliers/**",
-            "/api/v1/inventory/items"
+            "/api/v1/inventory/items/**"
     );
 
     private static final List<String> OPEN_POST_ENDPOINTS = List.of(
@@ -31,7 +31,7 @@ public class RouteValidator {
           "/api/v1/appprovals/**",
           "/api/v1/purchase-orders/**",
           "/api/v1/suppliers/**",
-          "/api/v1/inventory/items"
+          "/api/v1/inventory/items/**"
           
     );
 
