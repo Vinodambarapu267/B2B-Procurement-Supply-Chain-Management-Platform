@@ -6,6 +6,7 @@ import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -31,6 +32,7 @@ public class SupplierController {
 	private final SupplierService supplierService;
 
 	@PostMapping
+	@PreAuthorize("hasAuthority('SUPPLIER_CREATE')")
 	public ResponseEntity<?> createSupplier(@RequestBody Supplier supplier) {
 		 Supplier newSupplier = supplierService.createSupplier(supplier);
 		 if(newSupplier==null) {
@@ -51,6 +53,7 @@ public class SupplierController {
 	}
 
 	@PatchMapping("/{id}/status")
+	@PreAuthorize("hasAuthority('SUPPLIER_DEACTIVATE')")
 	public ResponseEntity<?> updateStatus(@PathVariable(name = "id") UUID supplierId) {
 		 Supplier updateSupplierStatus = supplierService.updateSupplierStatus(supplierId);
 		 if(updateSupplierStatus==null) {
@@ -71,6 +74,7 @@ public class SupplierController {
 	}
 
 	@PutMapping("/{id}")
+	@PreAuthorize("hasAuthority('SUPPLIER_UPDATE')")
 	public ResponseEntity<?> updateSupplier(@PathVariable(name = "id") UUID supplierId, @RequestBody SupplierDto supplierDto) {
 		 Supplier updateSupplier = supplierService.updateSupplier(supplierId, supplierDto);
 		 if(updateSupplier==null) {
