@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import com.vinod.b2b.entity.InventoryItem;
@@ -28,20 +29,23 @@ public class InventoryReceiptsServiceImpl implements InventoryReceiptsService {
 	}
 
 	@Override
-	public InventoryReceipt addInventoryReceipt(InventoryReceipt inventoryReceipt) {
+	public InventoryReceipt addInventoryReceipt(InventoryReceipt inventoryReceipt, Authentication authentication) {
+
 		UUID itemId = inventoryReceipt.getItemId().getItemId();
 		InventoryItem inventoryItem = inventoryItemsRepository.findById(itemId)
 				.orElseThrow(() -> new InventoryItemNotFoundException("Inventory Item Not Found" + itemId));
 		Integer quantitityReceived = inventoryReceipt.getQuantityReceived();
+
 		if (quantitityReceived <= 0) {
 			throw new RuntimeException("Quantity received must be greater than zero");
 		}
+
 		inventoryItem.setQuantityOnHand(inventoryItem.getQuantityOnHand() + quantitityReceived);
 		inventoryReceipt.setItemId(inventoryItem);
 		if (inventoryReceipt.getQuantityExpected() != inventoryReceipt.getQuantityReceived()) {
 			inventoryReceipt.setDiscrepancyFlag(true);
 		}
-		// inventoryReceipt.setReceivedBy(inventoryReceipt.getReceivedBy());
+		inventoryReceipt.setReceivedBy(authentication.getName());
 		inventoryItemsRepository.save(inventoryItem);
 		return receiptsRepository.save(inventoryReceipt);
 	}

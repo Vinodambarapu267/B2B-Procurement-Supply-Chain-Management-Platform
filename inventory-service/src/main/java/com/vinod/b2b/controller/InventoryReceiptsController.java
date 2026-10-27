@@ -5,6 +5,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -28,8 +30,9 @@ public class InventoryReceiptsController {
 	}
 
 	@PostMapping
-	public ResponseEntity<?> addInventoryReceipt(@RequestBody InventoryReceipt inventoryReceipt) {
-		 InventoryReceipt receipt = inventoryReceiptsService.addInventoryReceipt(inventoryReceipt);
+	@PreAuthorize("hasAuthority('GOODS_RECEIPT_CREATE')")
+	public ResponseEntity<?> addInventoryReceipt(@RequestBody InventoryReceipt inventoryReceipt,Authentication authentication) {
+		 InventoryReceipt receipt = inventoryReceiptsService.addInventoryReceipt(inventoryReceipt,authentication);
 			if (receipt == null) {
 				return ResponseEntity.ok(
 						ResponseMessage.builder()
