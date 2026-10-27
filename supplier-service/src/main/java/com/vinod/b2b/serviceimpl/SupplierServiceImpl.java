@@ -6,7 +6,9 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
+import com.vinod.b2b.dto.SupplierDto;
 import com.vinod.b2b.entity.Supplier;
 import com.vinod.b2b.exceptions.SupplierAlreadyExistException;
 import com.vinod.b2b.exceptions.SupplierNotFoundException;
@@ -40,6 +42,16 @@ public class SupplierServiceImpl implements SupplierService {
 		supplier.setIsActive(!isActive);
 		return repository.save(supplier);
 
+	}
+
+	@Override
+	@Transactional
+	public Supplier updateSupplier(UUID supplierId, SupplierDto supplierDto) {
+		Supplier supplier = repository.findById(supplierId)
+				.orElseThrow(() -> new SupplierNotFoundException("Supplier not found ID : " + supplierId));
+		supplier.setSupplierName(supplierDto.getSupplierName());
+		supplier.setCategory(supplierDto.getCategory());
+		return repository.save(supplier);
 	}
 
 	@Override
