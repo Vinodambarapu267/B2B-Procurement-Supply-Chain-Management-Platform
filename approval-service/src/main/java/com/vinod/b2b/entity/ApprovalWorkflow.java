@@ -25,14 +25,10 @@ public class ApprovalWorkflow {
 	private UUID prId;
 	@Column(name = "requester_id", nullable = false)
 	private UUID requesterId;
-
 	@Column(nullable = false)
 	private Double totalEstimate;
-
 	@Enumerated(EnumType.STRING)
-	@Column(nullable = false)
 	private ApprovalLevel currentLevel;
-
 	@Enumerated(EnumType.STRING)
 	@Column(nullable = false)
 	private Decision status;
