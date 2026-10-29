@@ -13,10 +13,14 @@ import org.springframework.stereotype.Service;
 import com.vinod.b2b.dto.ApprovalDecisionDto;
 import com.vinod.b2b.dto.UserDto;
 import com.vinod.b2b.entity.ApprovalDecisions;
-import com.vinod.b2b.exceptions.ApproverNotFoundException;
+import com.vinod.b2b.entity.ApprovalWorkflow;
 import com.vinod.b2b.exceptions.PurchaseRequestNotFoundException;
 import com.vinod.b2b.feignclients.UserServiceFeignClient;
+import com.vinod.b2b.kafka.EventType;
+import com.vinod.b2b.kafka.KafkaPurchaseApprovalProducer;
+import com.vinod.b2b.kafka.PurchaseRequestDecisionEvent;
 import com.vinod.b2b.repository.ApprovalRepository;
+import com.vinod.b2b.repository.ApprovalWorkFlowRepository;
 import com.vinod.b2b.service.ApprovalService;
 import com.vinod.b2b.utility.ApprovalLevel;
 import com.vinod.b2b.utility.Decision;
@@ -28,6 +32,10 @@ import lombok.RequiredArgsConstructor;
 public class ApprovalServiceImpl implements ApprovalService {
 	private final ApprovalRepository repository;
 	private final UserServiceFeignClient feignClient;
+	private final KafkaPurchaseApprovalProducer kafkaPurchaseApprovalProducer;
+	private final ApprovalWorkFlowRepository approvalWorkFlowRepository;
+	private static final List<ApprovalLevel> APPROVAL_FLOW = List.of(ApprovalLevel.MANAGER, ApprovalLevel.FINANCE,
+			ApprovalLevel.PROCUREMENT_OFFICER);
 
 	private Set<String> authorities(Authentication authentication) {
 		if (authentication == null)
@@ -49,14 +57,13 @@ public class ApprovalServiceImpl implements ApprovalService {
 		if (authentication == null) {
 			throw new AccessDeniedException("User is not authenticated");
 		}
-
 		String role = authentication.getAuthorities().stream().map(GrantedAuthority::getAuthority)
 				.filter(authority -> authority.startsWith("ROLE_")).map(authority -> authority.substring(5)).findFirst()
 				.orElseThrow(() -> new AccessDeniedException("No role found for user"));
-
 		try {
 			return ApprovalLevel.valueOf(role);
 		} catch (IllegalArgumentException e) {
+			System.out.println("eror 1:   in role");
 			throw new AccessDeniedException("User role does not match an ApprovalLevel");
 		}
 	}
@@ -64,7 +71,9 @@ public class ApprovalServiceImpl implements ApprovalService {
 	private UUID resolveUserId(String username) {
 		UserDto user = feignClient.findByName(username);
 		if (user == null || user.getUserId() == null) {
+			System.out.println("error 2 : in resolveUserId " + username);
 			throw new RuntimeException("User Not found by username: " + username);
+
 		}
 		return user.getUserId();
 	}
@@ -72,22 +81,80 @@ public class ApprovalServiceImpl implements ApprovalService {
 	@Override
 	public ApprovalDecisions addApporvalDecision(UUID prId, ApprovalDecisionDto approvalDecisionDto,
 			Authentication authentication) {
-		Set<String> permission = authorities(authentication);
-		if (!has(permission, "APPROVAL_DECIDE")) {
-			throw new AccessDeniedException("You Don't permission to make approve");
+		Set<String> permissions = authorities(authentication);
+		UUID approverId = resolveUserId(authentication.getName());
+		if (!has(permissions, "APPROVAL_DECIDE")) {
+			System.out.println("error 3: You do not have permission to approv" + permissions);
+			throw new RuntimeException("You do not have permission to approve");
 		}
+		Decision decision = approvalDecisionDto.getDecision();
 
 		ApprovalLevel currentRole = getCurrentRole(authentication);
+		ApprovalLevel requiredLevel = getRequiredApprovalLevel(prId);
+		if (currentRole != requiredLevel) {
+			System.out.println("error 4: in decideding of approval level");
+			throw new RuntimeException(requiredLevel+" : approval required ");
+		}
+		boolean alreadyApproved = repository.existsByPrIdAndDecisionAndLevel(prId, Decision.APPROVED, currentRole);
 
-		UUID approverId = resolveUserId(authentication.getName());
-		ApprovalDecisions approvaDecisions = new ApprovalDecisions();
-		approvaDecisions.setPrId(prId);
-		approvaDecisions.setApproverId(approverId);
-		approvaDecisions.setDecision(approvalDecisionDto.getDecision());
-		approvaDecisions.setLevel(currentRole);
-		approvaDecisions.setReason(approvalDecisionDto.getReason());
-		return repository.save(approvaDecisions);
+		boolean alreadyRejected = repository.existsByPrIdAndDecisionAndLevel(prId, Decision.REJECTED, currentRole);
 
+		if (alreadyApproved || alreadyRejected) {
+			throw new IllegalStateException("A decision has already been recorded for this level: " + currentRole);
+		}
+
+		ApprovalDecisions approvalDecision = new ApprovalDecisions();
+		approvalDecision.setPrId(prId);
+		approvalDecision.setApproverId(approverId);
+		approvalDecision.setDecision(decision);
+		approvalDecision.setLevel(currentRole);
+		System.err.println(currentRole + " : " + authentication.getName());
+		approvalDecision.setReason(approvalDecisionDto.getReason());
+		ApprovalDecisions savedDecision = repository.save(approvalDecision);
+		System.out.println("error 6:  saveing of data" + savedDecision);
+		ApprovalWorkflow workflow = approvalWorkFlowRepository.findById(prId)
+				.orElseThrow(() -> new RuntimeException("Purchase request not found for id: " + prId));
+		workflow.setCurrentLevel(requiredLevel);
+		workflow.setStatus(decision);
+		approvalWorkFlowRepository.save(workflow);
+		publishApprovalEventIfNeeded(prId, decision, requiredLevel, approvalDecisionDto.getReason(), approverId);
+		
+		
+		return savedDecision;
+	}
+
+	private void publishApprovalEventIfNeeded(UUID prId, Decision decision, ApprovalLevel decidedLevel, String reason,
+			UUID approverId) {
+		boolean shouldPublish = decision == Decision.REJECTED || isFinalApproval(prId);
+		if (!shouldPublish) {
+			return;
+		}
+		ApprovalWorkflow workflow = approvalWorkFlowRepository.findById(prId)
+				.orElseThrow(() -> new RuntimeException("Purchase request not found for id: " + prId));
+		workflow.setCurrentLevel(decidedLevel);
+		workflow.setStatus(decision);
+		approvalWorkFlowRepository.save(workflow);
+		System.err.println(workflow);
+		PurchaseRequestDecisionEvent event = new PurchaseRequestDecisionEvent();
+		event.setPrId(prId);
+		event.setApprovalLevel(decidedLevel);
+		event.setDecision(decision);
+		event.setReason(reason);
+		event.setTotalEstimate(workflow.getTotalEstimate());
+		event.setEventType(handleEventDecision(decision));
+		System.out.println("error 7: in kafka");
+		kafkaPurchaseApprovalProducer.handlePurchaseRequestApproval(event);
+	}
+
+	private boolean isFinalApproval(UUID prId) {
+		for (ApprovalLevel level : APPROVAL_FLOW) {
+			boolean approved = repository.existsByPrIdAndDecisionAndLevel(prId, Decision.APPROVED, level);
+			if (!approved) {
+				System.out.println("error 8:  in finalApproval");
+				return false;
+			}
+		}
+		return true;
 	}
 
 	@Override
@@ -95,10 +162,10 @@ public class ApprovalServiceImpl implements ApprovalService {
 
 		Set<String> permissions = authorities(authentication);
 		if (!has(permissions, "APPROVAL_PENDING_LIST")) {
+
 			throw new AccessDeniedException("You don't have permission to view pending approvals");
 		}
-		UUID approverId = resolveUserId(authentication.getName());
-		return repository.findAllByApproverIdAndDecision(approverId, Decision.PENDING);
+		return repository.findAllByDecision(Decision.PENDING_APPROVAL);
 
 	}
 
@@ -112,4 +179,32 @@ public class ApprovalServiceImpl implements ApprovalService {
 		return listAllPR;
 	}
 
+	private EventType handleEventDecision(Decision decision) {
+		return switch (decision) {
+		case APPROVED -> EventType.APPROVED;
+		case REJECTED -> EventType.REJECTED;
+		default -> {
+			System.out.println("error 9: in handleDecision");
+			throw new IllegalArgumentException("Only APPROVED or REJECTED decisions are allowed " + decision);
+		}
+		};
+	}
+
+	private ApprovalLevel getRequiredApprovalLevel(UUID prId) {
+		for (ApprovalLevel level : APPROVAL_FLOW) {
+			boolean approved = repository.existsByPrIdAndDecisionAndLevel(prId, Decision.APPROVED, level);
+
+			boolean rejected = repository.existsByPrIdAndDecisionAndLevel(prId, Decision.REJECTED, level);
+			if (rejected) {
+				System.out.println("error 12:  in decideding of approval level" + prId);
+				throw new RuntimeException("Purchase request was rejected by " + level);
+			}
+			if (!approved) {
+				return level;
+			}
+		}
+
+		System.out.println("error 13:  alredy completed" + prId);
+		throw new RuntimeException("All approval decisions have already been recorded");
+	}
 }
