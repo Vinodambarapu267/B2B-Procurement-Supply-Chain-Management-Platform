@@ -63,7 +63,6 @@ public class ApprovalServiceImpl implements ApprovalService {
 		try {
 			return ApprovalLevel.valueOf(role);
 		} catch (IllegalArgumentException e) {
-			System.out.println("eror 1:   in role");
 			throw new AccessDeniedException("User role does not match an ApprovalLevel");
 		}
 	}
@@ -71,7 +70,6 @@ public class ApprovalServiceImpl implements ApprovalService {
 	private UUID resolveUserId(String username) {
 		UserDto user = feignClient.findByName(username);
 		if (user == null || user.getUserId() == null) {
-			System.out.println("error 2 : in resolveUserId " + username);
 			throw new RuntimeException("User Not found by username: " + username);
 
 		}
@@ -84,7 +82,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		Set<String> permissions = authorities(authentication);
 		UUID approverId = resolveUserId(authentication.getName());
 		if (!has(permissions, "APPROVAL_DECIDE")) {
-			System.out.println("error 3: You do not have permission to approv" + permissions);
+
 			throw new RuntimeException("You do not have permission to approve");
 		}
 		Decision decision = approvalDecisionDto.getDecision();
@@ -92,8 +90,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		ApprovalLevel currentRole = getCurrentRole(authentication);
 		ApprovalLevel requiredLevel = getRequiredApprovalLevel(prId);
 		if (currentRole != requiredLevel) {
-			System.out.println("error 4: in decideding of approval level");
-			throw new RuntimeException(requiredLevel+" : approval required ");
+			throw new RuntimeException(requiredLevel + " : approval required ");
 		}
 		boolean alreadyApproved = repository.existsByPrIdAndDecisionAndLevel(prId, Decision.APPROVED, currentRole);
 
@@ -108,18 +105,15 @@ public class ApprovalServiceImpl implements ApprovalService {
 		approvalDecision.setApproverId(approverId);
 		approvalDecision.setDecision(decision);
 		approvalDecision.setLevel(currentRole);
-		System.err.println(currentRole + " : " + authentication.getName());
 		approvalDecision.setReason(approvalDecisionDto.getReason());
 		ApprovalDecisions savedDecision = repository.save(approvalDecision);
-		System.out.println("error 6:  saveing of data" + savedDecision);
 		ApprovalWorkflow workflow = approvalWorkFlowRepository.findById(prId)
 				.orElseThrow(() -> new RuntimeException("Purchase request not found for id: " + prId));
 		workflow.setCurrentLevel(requiredLevel);
 		workflow.setStatus(decision);
 		approvalWorkFlowRepository.save(workflow);
 		publishApprovalEventIfNeeded(prId, decision, requiredLevel, approvalDecisionDto.getReason(), approverId);
-		
-		
+
 		return savedDecision;
 	}
 
@@ -134,7 +128,6 @@ public class ApprovalServiceImpl implements ApprovalService {
 		workflow.setCurrentLevel(decidedLevel);
 		workflow.setStatus(decision);
 		approvalWorkFlowRepository.save(workflow);
-		System.err.println(workflow);
 		PurchaseRequestDecisionEvent event = new PurchaseRequestDecisionEvent();
 		event.setPrId(prId);
 		event.setApprovalLevel(decidedLevel);
@@ -142,7 +135,6 @@ public class ApprovalServiceImpl implements ApprovalService {
 		event.setReason(reason);
 		event.setTotalEstimate(workflow.getTotalEstimate());
 		event.setEventType(handleEventDecision(decision));
-		System.out.println("error 7: in kafka");
 		kafkaPurchaseApprovalProducer.handlePurchaseRequestApproval(event);
 	}
 
@@ -150,7 +142,6 @@ public class ApprovalServiceImpl implements ApprovalService {
 		for (ApprovalLevel level : APPROVAL_FLOW) {
 			boolean approved = repository.existsByPrIdAndDecisionAndLevel(prId, Decision.APPROVED, level);
 			if (!approved) {
-				System.out.println("error 8:  in finalApproval");
 				return false;
 			}
 		}
@@ -184,7 +175,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		case APPROVED -> EventType.APPROVED;
 		case REJECTED -> EventType.REJECTED;
 		default -> {
-			System.out.println("error 9: in handleDecision");
+
 			throw new IllegalArgumentException("Only APPROVED or REJECTED decisions are allowed " + decision);
 		}
 		};
@@ -196,7 +187,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 
 			boolean rejected = repository.existsByPrIdAndDecisionAndLevel(prId, Decision.REJECTED, level);
 			if (rejected) {
-				System.out.println("error 12:  in decideding of approval level" + prId);
+
 				throw new RuntimeException("Purchase request was rejected by " + level);
 			}
 			if (!approved) {
@@ -204,7 +195,6 @@ public class ApprovalServiceImpl implements ApprovalService {
 			}
 		}
 
-		System.out.println("error 13:  alredy completed" + prId);
 		throw new RuntimeException("All approval decisions have already been recorded");
 	}
 }
