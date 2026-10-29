@@ -11,7 +11,6 @@ import com.vinod.b2b.repository.ApprovalRepository;
 import com.vinod.b2b.repository.ApprovalWorkFlowRepository;
 import com.vinod.b2b.utility.ApprovalLevel;
 import com.vinod.b2b.utility.Decision;
-
 @Component
 public class KafkaPurchaseRequestConsumer {
 	;
@@ -44,7 +43,6 @@ public class KafkaPurchaseRequestConsumer {
 			approvalWorkflow.setPrId(event.getPrId());
 			approvalWorkflow.setRequesterId(event.getRequesterId());
 			approvalWorkflow.setTotalEstimate(event.getTotalEstimation());
-			approvalWorkflow.setCurrentLevel(ApprovalLevel.MANAGER);
 			approvalWorkflow.setStatus(Decision.PENDING_APPROVAL);
 
 			approvalWorkFlowRepository.save(approvalWorkflow);
