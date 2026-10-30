@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.example.demo.entity.PurchaseRequest;
 import com.example.demo.exception.PurchaseRequestNotFoundException;
 import com.example.demo.repository.PurchaseRequestRepository;
+import com.example.demo.utility.PurchaseStatus;
 
 @Component
 public class KafkaPurchaseApprovalConsumer {
@@ -22,15 +23,23 @@ public class KafkaPurchaseApprovalConsumer {
 
 	@Transactional
 	@Modifying
-	@KafkaListener(topics = {"purchase-request-approved"},groupId = "approvel-service-group")
+	@KafkaListener(topics = { "purchase-request-approved",
+			"purchase-request-rejected" }, groupId = "approvel-service-group")
 	public void handlePurchaseApprovalEvent(PurchaseRequestDecisionEvent event) {
-		if (event.getEventType().equals(EventType.APPROVED)) {
-
-			PurchaseRequest purchaseRequest = purchaseRequestRepository.findById(event.getPrId())
-					.orElseThrow(() -> new PurchaseRequestNotFoundException("Purchase Request Not found"));
-			purchaseRequest.setStatus(event.getDecision());
-			purchaseRequest.setUpdatedAt(LocalDateTime.now());
-			purchaseRequestRepository.save(purchaseRequest);
+		if (event.getEventType() == null) {
+			throw new IllegalArgumentException("Event type cannot be null");
 		}
+		PurchaseStatus status = switch (event.getEventType()) {
+		case APPROVED -> PurchaseStatus.APPROVED;
+		case REJECTED -> PurchaseStatus.REJECTED;
+		default -> throw new IllegalArgumentException("Unsupported event type: " + event.getEventType());
+		};
+
+		PurchaseRequest purchaseRequest = purchaseRequestRepository.findById(event.getPrId()).orElseThrow(
+				() -> new PurchaseRequestNotFoundException("Purchase Request not found: " + event.getPrId()));
+		purchaseRequest.setStatus(status);
+		purchaseRequest.setUpdatedAt(LocalDateTime.now());
+		purchaseRequestRepository.save(purchaseRequest);
 	}
+
 }
