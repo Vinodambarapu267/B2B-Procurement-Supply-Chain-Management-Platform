@@ -24,7 +24,7 @@ public class PurchaseOrders {
 	private UUID purchaseOrderId;
 	@Column(nullable = false)
 	private UUID prId;
-	@Column(nullable = false)
+	@Column(nullable = true)
 	private UUID supplierId;
 	@Column(nullable = false, unique = true)
 	private String poNumber;
