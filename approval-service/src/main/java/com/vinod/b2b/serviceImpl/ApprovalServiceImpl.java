@@ -107,11 +107,6 @@ public class ApprovalServiceImpl implements ApprovalService {
 		approvalDecision.setLevel(currentRole);
 		approvalDecision.setReason(approvalDecisionDto.getReason());
 		ApprovalDecisions savedDecision = repository.save(approvalDecision);
-		ApprovalWorkflow workflow = approvalWorkFlowRepository.findById(prId)
-				.orElseThrow(() -> new RuntimeException("Purchase request not found for id: " + prId));
-		workflow.setCurrentLevel(requiredLevel);
-		workflow.setStatus(decision);
-		approvalWorkFlowRepository.save(workflow);
 		publishApprovalEventIfNeeded(prId, decision, requiredLevel, approvalDecisionDto.getReason(), approverId);
 
 		return savedDecision;
@@ -135,7 +130,11 @@ public class ApprovalServiceImpl implements ApprovalService {
 		event.setReason(reason);
 		event.setTotalEstimate(workflow.getTotalEstimate());
 		event.setEventType(handleEventDecision(decision));
-		kafkaPurchaseApprovalProducer.handlePurchaseRequestApproval(event);
+		if (decision == Decision.APPROVED) {
+			kafkaPurchaseApprovalProducer.handlePurchaseRequestApproval(event);
+		} else {
+			kafkaPurchaseApprovalProducer.handlePurchaseRequestReject(event);
+		}
 	}
 
 	private boolean isFinalApproval(UUID prId) {
