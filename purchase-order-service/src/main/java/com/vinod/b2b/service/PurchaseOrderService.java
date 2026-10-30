@@ -5,12 +5,13 @@ import java.util.UUID;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import com.vinod.b2b.dto.PurchaseOrderCreateRequest;
 import com.vinod.b2b.entity.PurchaseOrders;
 import com.vinod.b2b.utility.OrderStatus;
 
 @Service
 public interface PurchaseOrderService {
-	PurchaseOrders generatePurchaseOrder(PurchaseOrders purchaseOrders, Authentication authentication);
+	PurchaseOrders generatePurchaseOrder(PurchaseOrderCreateRequest request, Authentication authentication);
 
 	PurchaseOrders updatePurchaseOrderstatus(UUID purchaseOrderId, OrderStatus status);
 

@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.vinod.b2b.dto.PurchaseOrderCreateRequest;
 import com.vinod.b2b.entity.PurchaseOrders;
 import com.vinod.b2b.service.PurchaseOrderService;
 import com.vinod.b2b.utility.ResponseMessage;
@@ -29,9 +30,10 @@ public class PurchaseOrderController {
 
 	@PostMapping
 	@PreAuthorize("hasAuthority('PURCHASE_ORDER_CREATE')")
-	public ResponseEntity<?> generatePurchaseOrder(@RequestBody PurchaseOrders purchaseOrders,
+	public ResponseEntity<?> generatePurchaseOrder(
+			@RequestBody PurchaseOrderCreateRequest request,
 			Authentication authentication) {
-		PurchaseOrders purchaseOrder = purchaseOrderService.generatePurchaseOrder(purchaseOrders, authentication);
+		PurchaseOrders purchaseOrder = purchaseOrderService.generatePurchaseOrder(request, authentication);
 		if (purchaseOrder == null) {
 			return ResponseEntity.ok(ResponseMessage.builder().message("New PurchaseOrder generated failed..")
 					.status(ResponseStatus.FAILED.name()).statusCode(HttpURLConnection.HTTP_NO_CONTENT).build());

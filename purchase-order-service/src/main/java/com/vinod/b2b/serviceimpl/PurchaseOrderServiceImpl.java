@@ -8,9 +8,12 @@ import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
+import com.vinod.b2b.dto.PurchaseOrderCreateRequest;
+import com.vinod.b2b.dto.SupplierDto;
 import com.vinod.b2b.dto.UserDto;
 import com.vinod.b2b.entity.PurchaseOrders;
 import com.vinod.b2b.exceptions.PurchaseOrderNotFoundException;
+import com.vinod.b2b.feignclient.SupplierServiceFeignClient;
 import com.vinod.b2b.feignclient.UserServiceFeignClient;
 import com.vinod.b2b.repository.PurchaseOrderRepository;
 import com.vinod.b2b.service.PurchaseOrderService;
@@ -23,6 +26,7 @@ import lombok.RequiredArgsConstructor;
 public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 	private final PurchaseOrderRepository repository;
 	private final UserServiceFeignClient feignClient;
+	private final SupplierServiceFeignClient supplierServiceFeignClient;
 
 	private Set<String> authorities(Authentication authentication) {
 		if (authentication == null)
@@ -49,17 +53,23 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 	}
 
 	@Override
-	public PurchaseOrders generatePurchaseOrder(PurchaseOrders purchaseOrders, Authentication authentication) {
+	public PurchaseOrders generatePurchaseOrder(PurchaseOrderCreateRequest request, Authentication authentication) {
 		Set<String> permissions = authorities(authentication);
 		if (!has(permissions, "PURCHASE_ORDER_CREATE")) {
 			throw new AccessDeniedException("You don't have Pemission to create purchase orders");
 		}
-		PurchaseOrders order = new PurchaseOrders();
-		order.setPrId(purchaseOrders.getPrId());
-		order.setSupplierId(purchaseOrders.getSupplierId());
-		order.setPoNumber(generateRandomPONumber());
+		SupplierDto supplier = supplierServiceFeignClient.getSupplierByName(request.getSupplierName());
+		if (supplier == null) {
+			throw new RuntimeException("Supplier not found");
+		}
+		if (!supplier.getIsActive()) {
+			throw new RuntimeException("Supplier account is deActive");
+		}
+		PurchaseOrders order = repository.findByPrIdAndStatus(request.getPrId(), OrderStatus.APPROVED)
+				.orElseThrow(() -> new PurchaseOrderNotFoundException("Purchase Nort Found :"));
+		order.setSupplierId(supplier.getSupplierId());
 		order.setStatus(OrderStatus.GENERATED);
-		order.setTotalAmount(purchaseOrders.getTotalAmount());
+		order.setVersion(order.getVersion() + 1);
 		return repository.save(order);
 	}
 
