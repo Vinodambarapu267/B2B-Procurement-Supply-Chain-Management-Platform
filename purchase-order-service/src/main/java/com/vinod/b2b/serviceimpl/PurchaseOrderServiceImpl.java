@@ -65,8 +65,10 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 		if (!supplier.getIsActive()) {
 			throw new RuntimeException("Supplier account is deActive");
 		}
+
 		PurchaseOrders order = repository.findByPrIdAndStatus(request.getPrId(), OrderStatus.APPROVED)
-				.orElseThrow(() -> new PurchaseOrderNotFoundException("Purchase Nort Found :"));
+				.orElseThrow(() -> new PurchaseOrderNotFoundException(
+						"Purchase Order Already Generated : " + OrderStatus.GENERATED));
 		order.setSupplierId(supplier.getSupplierId());
 		order.setStatus(OrderStatus.GENERATED);
 		order.setVersion(order.getVersion() + 1);
