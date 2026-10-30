@@ -64,4 +64,12 @@ public class SupplierServiceImpl implements SupplierService {
 		return all;
 	}
 
+	@Override
+	public SupplierDto findByNanme(String name) {
+		Supplier supplier = repository.findBySupplierName(name)
+				.orElseThrow(() -> new SupplierNotFoundException("Supplier not found : " + name));
+
+		return new SupplierDto(supplier.getSupplierId(), name, supplier.getCategory(), supplier.getIsActive());
+	}
+
 }
