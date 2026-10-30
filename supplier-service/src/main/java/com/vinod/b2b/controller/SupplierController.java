@@ -23,6 +23,7 @@ import com.vinod.b2b.service.SupplierService;
 import com.vinod.b2b.utility.ResponseMessage;
 import com.vinod.b2b.utility.ResponseStatus;
 
+import jakarta.ws.rs.Path;
 import lombok.RequiredArgsConstructor;
 
 @RestController
@@ -93,6 +94,11 @@ public class SupplierController {
 				 .build()
 				 );
 	}
+	@GetMapping("/{name}")
+	public SupplierDto getSupplierByName(@PathVariable String name ) {
+		return supplierService.findByNanme(name);
+	}
+	
 	@GetMapping
 	public Page<Supplier> getAllSuppliers(@RequestParam int page, @RequestParam String sortBy) {
 		return supplierService.getAllSuppliers(page, sortBy);

@@ -17,4 +17,6 @@ public interface SupplierService {
 	Supplier updateSupplier(UUID supplierId, SupplierDto supplierDto);
 
 	Page<Supplier> getAllSuppliers(int page, String sortBy);
+
+	SupplierDto findByNanme(String name);
 }
