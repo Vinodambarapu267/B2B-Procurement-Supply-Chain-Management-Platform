@@ -15,4 +15,7 @@ public class KafkaPurchaseApprovalProducer {
 	public void handlePurchaseRequestApproval(PurchaseRequestDecisionEvent event) {
 		kafkaTemplate.send("purchase-request-approved", event.getPrId().toString(), event);
 	}
+	public void handlePurchaseRequestReject(PurchaseRequestDecisionEvent event) {
+		kafkaTemplate.send("purchase-request-rejected", event.getPrId().toString(), event);
+	}
 }
