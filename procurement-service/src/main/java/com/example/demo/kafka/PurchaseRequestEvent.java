@@ -1,8 +1,10 @@
 package com.example.demo.kafka;
 
 import java.time.LocalDateTime;
+import java.util.List;
 import java.util.UUID;
 
+import com.example.demo.dto.PurchaseItem;
 import com.example.demo.utility.PurchaseStatus;
 
 import lombok.AllArgsConstructor;
@@ -18,6 +20,7 @@ public class PurchaseRequestEvent {
 	private Double totalEstimation;
 	private PurchaseStatus status;
 	private Integer version;
+	private List<PurchaseItem> items;
 	private LocalDateTime submittedAt;
 	private EventType eventType;
 }
