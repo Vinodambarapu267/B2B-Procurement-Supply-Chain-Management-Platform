@@ -18,15 +18,13 @@ public class KafkaPurchaseRequestConsumer {
 		this.orderRepository = orderRepository;
 	}
 	@KafkaListener(topics = { "purchase-request-created" }, groupId = "purchase-order-service-group")
-	public void handlePurchaserequeest(PurchaseRequestEvent event) {
+	public void handlePurchaserequestcreated(PurchaseRequestEvent event) {
 		if (event.getEventType().equals(EventType.CREATED)) {
-
 			PurchaseOrders orders = new PurchaseOrders();
-
 			orders.setPrId(event.getPrId());
 			orders.setItems(event.getItems());
 			orders.setPoNumber(generatePONumber());
-			orders.setStatus(OrderStatus.GENERATED);
+			orders.setStatus(OrderStatus.CREATED);
 			orders.setTotalAmount(event.getTotalEstimation());
 			orderRepository.save(orders);
 
