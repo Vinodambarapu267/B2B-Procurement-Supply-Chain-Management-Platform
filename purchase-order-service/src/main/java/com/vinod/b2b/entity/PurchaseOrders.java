@@ -1,7 +1,12 @@
 package com.vinod.b2b.entity;
 
+import java.util.List;
 import java.util.UUID;
 
+import org.hibernate.annotations.JdbcTypeCode;
+import org.hibernate.type.SqlTypes;
+
+import com.vinod.b2b.dto.PurchaseItem;
 import com.vinod.b2b.utility.OrderStatus;
 
 import jakarta.persistence.Column;
@@ -31,8 +36,11 @@ public class PurchaseOrders {
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private OrderStatus status;
+	@Column(columnDefinition = "json", nullable = false)
+	@JdbcTypeCode(SqlTypes.JSON)
+	private List<PurchaseItem> items;
 	@Column(nullable = false)
 	private Double totalAmount;
 	@Column(nullable = false)
-	private Integer version=0;
+	private Integer version = 0;
 }
