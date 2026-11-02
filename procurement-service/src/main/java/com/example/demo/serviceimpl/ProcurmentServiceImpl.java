@@ -79,6 +79,7 @@ public class ProcurmentServiceImpl implements ProcurementService {
 		PurchaseRequestEvent event = new PurchaseRequestEvent();
 		event.setPrId(save.getPurchaseId());
 		event.setRequesterId(save.getRequesterId());
+		event.setItems(items);
 		event.setTotalEstimation(save.getTotalEstimation());
 		event.setVersion(save.getVersion());
 		event.setStatus(save.getStatus());
@@ -129,7 +130,7 @@ public class ProcurmentServiceImpl implements ProcurementService {
 			throw new AccessDeniedException("You don't have permission to cancel this purchase request");
 		}
 		PurchaseStatus status = purchaseRequest.getStatus();
-	
+
 		// cannnot cancel in terminal state
 		if (status == PurchaseStatus.APPROVED || status == PurchaseStatus.COMPLETED
 				|| status == PurchaseStatus.PO_GENERATED) {
