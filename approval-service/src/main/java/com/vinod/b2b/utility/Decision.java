@@ -1,5 +1,5 @@
 package com.vinod.b2b.utility;
 
 public enum Decision {
-	APPROVED, REJECTED, PENDING,PENDING_APPROVAL
+	APPROVED, REJECTED, PENDING, PENDING_APPROVAL, CANCELLED
 }
