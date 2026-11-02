@@ -106,6 +106,11 @@ public class ApprovalServiceImpl implements ApprovalService {
 		approvalDecision.setDecision(decision);
 		approvalDecision.setLevel(currentRole);
 		approvalDecision.setReason(approvalDecisionDto.getReason());
+		ApprovalWorkflow workflow = approvalWorkFlowRepository.findById(prId)
+				.orElseThrow(() -> new RuntimeException("Purchase request not found for id: " + prId));
+		workflow.setCurrentLevel(currentRole);
+		workflow.setStatus(decision);
+		approvalWorkFlowRepository.save(workflow);
 		ApprovalDecisions savedDecision = repository.save(approvalDecision);
 		publishApprovalEventIfNeeded(prId, decision, requiredLevel, approvalDecisionDto.getReason(), approverId);
 
