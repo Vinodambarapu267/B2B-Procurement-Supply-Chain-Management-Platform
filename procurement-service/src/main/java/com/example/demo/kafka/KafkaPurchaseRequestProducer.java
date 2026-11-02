@@ -15,4 +15,8 @@ public class KafkaPurchaseRequestProducer {
 	public void publisPurchaseRequestCreated(PurchaseRequestEvent event) {
 		kafkaTemplate.send("purchase-request-created", event.getPrId().toString(), event);
 	}
+
+	public void publishedPurchaseRequestCancelled(PurchaseRequestEvent event) {
+		kafkaTemplate.send("purchase-request-cancelled", event.getPrId().toString(), event);
+	}
 }

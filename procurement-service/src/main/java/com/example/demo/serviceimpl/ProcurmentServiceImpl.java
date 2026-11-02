@@ -144,6 +144,13 @@ public class ProcurmentServiceImpl implements ProcurementService {
 		}
 
 		purchaseRequest.setStatus(PurchaseStatus.CANCELLED);
+		PurchaseRequest cancelledPurchaserequest = repository.save(purchaseRequest);
+		
+		PurchaseRequestEvent event = new PurchaseRequestEvent();
+		event.setPrId(cancelledPurchaserequest.getPurchaseId());
+		event.setStatus(cancelledPurchaserequest.getStatus());
+		event.setEventType(EventType.CANCELLED);
+		kafkaPurchaseRequestProducer.publishedPurchaseRequestCancelled(event);
 		return "purchase requeest cancelled successfully";
 	}
 
