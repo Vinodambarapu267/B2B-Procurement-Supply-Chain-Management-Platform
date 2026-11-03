@@ -15,6 +15,9 @@ import com.vinod.b2b.entity.PurchaseOrders;
 import com.vinod.b2b.exceptions.PurchaseOrderNotFoundException;
 import com.vinod.b2b.feignclient.SupplierServiceFeignClient;
 import com.vinod.b2b.feignclient.UserServiceFeignClient;
+import com.vinod.b2b.kafka.EventType;
+import com.vinod.b2b.kafka.PurchaseRequestEvent;
+import com.vinod.b2b.kafka.kafkaPurchaseOrderProducer;
 import com.vinod.b2b.repository.PurchaseOrderRepository;
 import com.vinod.b2b.service.PurchaseOrderService;
 import com.vinod.b2b.utility.OrderStatus;
@@ -27,6 +30,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 	private final PurchaseOrderRepository repository;
 	private final UserServiceFeignClient feignClient;
 	private final SupplierServiceFeignClient supplierServiceFeignClient;
+	private final kafkaPurchaseOrderProducer kafkaPurchaseOrderProducer;
 
 	private Set<String> authorities(Authentication authentication) {
 		if (authentication == null)
@@ -58,21 +62,29 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 		if (!has(permissions, "PURCHASE_ORDER_CREATE")) {
 			throw new AccessDeniedException("You don't have Pemission to create purchase orders");
 		}
-		SupplierDto supplier = supplierServiceFeignClient.getSupplierByName(request.getSupplierName());
-		if (supplier == null) {
-			throw new RuntimeException("Supplier not found");
-		}
-		if (!supplier.getIsActive()) {
-			throw new RuntimeException("Supplier account is deActive");
-		}
+//		SupplierDto supplier = supplierServiceFeignClient.getSupplierByName(request.getSupplierName());
+//		if (supplier == null) {
+//			throw new RuntimeException("Supplier not found");
+//		}
+//		if (!supplier.getIsActive()) {
+//			throw new RuntimeException("Supplier account is deActive");
+//		}
 
 		PurchaseOrders order = repository.findByPrIdAndStatus(request.getPrId(), OrderStatus.APPROVED)
 				.orElseThrow(() -> new PurchaseOrderNotFoundException(
-						"Purchase Order Already Generated : " + OrderStatus.GENERATED));
-		order.setSupplierId(supplier.getSupplierId());
+						"Purchase Order Already Generated : " +request.getPrId()));
+		System.out.println(order.getStatus());
 		order.setStatus(OrderStatus.GENERATED);
 		order.setVersion(order.getVersion() + 1);
-		return repository.save(order);
+
+		PurchaseOrders save = repository.save(order);
+
+		PurchaseRequestEvent event = new PurchaseRequestEvent();
+		event.setEventType(EventType.GENERATED);
+		event.setPrId(save.getPrId());
+		event.setStatus(OrderStatus.GENERATED);
+		kafkaPurchaseOrderProducer.handlePurchaseOrderGenerated(event);
+		return save;
 	}
 
 	@Override
