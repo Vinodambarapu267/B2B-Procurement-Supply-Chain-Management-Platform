@@ -1,5 +1,5 @@
 package com.vinod.b2b.kafka;
 
 public enum EventType {
-	APPROVED, REJECTED, CREATED, GENERATED
+	APPROVED, REJECTED, CREATED, GENERATED,PO_SENT
 }
