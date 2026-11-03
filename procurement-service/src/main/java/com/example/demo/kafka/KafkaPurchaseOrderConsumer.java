@@ -20,10 +20,11 @@ public class KafkaPurchaseOrderConsumer {
 		this.requestRepository = requestRepository;
 	}
 
-	@KafkaListener(topics = { "purchase-order-created" }, groupId = "procurement-service-group")
+	@KafkaListener(topics = { "purchase-order-created","purchase-order-sent" }, groupId = "procurement-service-group")
 	public void handlePurchaseOrder(PurchaseRequestEvent event) {
 		switch (event.getEventType()) {
 		case GENERATED -> handlePurchaseOrderCreated(event);
+		case PO_SENT -> handlePurchaseOrderSent(event);
 		}
 	}
 
@@ -31,6 +32,15 @@ public class KafkaPurchaseOrderConsumer {
 		PurchaseRequest purchaseRequest = requestRepository.findById(event.getPrId()).orElseThrow(
 				() -> new PurchaseRequestNotFoundException("Purchase Request not found : " + event.getPrId()));
 		purchaseRequest.setStatus(PurchaseStatus.GENERATED);
+		purchaseRequest.setVersion(purchaseRequest.getVersion() + 1);
+		purchaseRequest.setUpdatedAt(LocalDateTime.now());
+		requestRepository.save(purchaseRequest);
+	}
+
+	public void handlePurchaseOrderSent(PurchaseRequestEvent event) {
+		PurchaseRequest purchaseRequest = requestRepository.findById(event.getPrId()).orElseThrow(
+				() -> new PurchaseRequestNotFoundException("Purchase Request not found : " + event.getPrId()));
+		purchaseRequest.setStatus(PurchaseStatus.PO_SENT);
 		purchaseRequest.setVersion(purchaseRequest.getVersion() + 1);
 		purchaseRequest.setUpdatedAt(LocalDateTime.now());
 		requestRepository.save(purchaseRequest);
