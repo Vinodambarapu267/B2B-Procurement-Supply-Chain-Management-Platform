@@ -22,7 +22,7 @@ public class KafkaPurchaseOrderConsumer {
 
 	@KafkaListener(topics = { "purchase-order-created", "purchase-order-sent",
 			"purchase-order-accepted" }, groupId = "procurement-service-group")
-	public void handlePurchaseOrder(PurchaseRequestEvent event) {
+	public void handlePurchaseOrder(PurchaseOrderEvent event) {
 		switch (event.getEventType()) {
 		case GENERATED -> handlePurchaseOrderCreated(event);
 		case PO_SENT -> handlePurchaseOrderSent(event);
@@ -31,7 +31,7 @@ public class KafkaPurchaseOrderConsumer {
 		}
 	}
 
-	public void handlePurchaseOrderCreated(PurchaseRequestEvent event) {
+	public void handlePurchaseOrderCreated(PurchaseOrderEvent event) {
 		PurchaseRequest purchaseRequest = requestRepository.findById(event.getPrId()).orElseThrow(
 				() -> new PurchaseRequestNotFoundException("Purchase Request not found : " + event.getPrId()));
 		purchaseRequest.setStatus(PurchaseStatus.GENERATED);
@@ -40,7 +40,7 @@ public class KafkaPurchaseOrderConsumer {
 		requestRepository.save(purchaseRequest);
 	}
 
-	public void handlePurchaseOrderSent(PurchaseRequestEvent event) {
+	public void handlePurchaseOrderSent(PurchaseOrderEvent event) {
 		PurchaseRequest purchaseRequest = requestRepository.findById(event.getPrId()).orElseThrow(
 				() -> new PurchaseRequestNotFoundException("Purchase Request not found : " + event.getPrId()));
 		purchaseRequest.setStatus(PurchaseStatus.PO_SENT);
@@ -49,7 +49,7 @@ public class KafkaPurchaseOrderConsumer {
 		requestRepository.save(purchaseRequest);
 	}
 
-	public void handlePurchaseOrderAccept(PurchaseRequestEvent event) {
+	public void handlePurchaseOrderAccept(PurchaseOrderEvent event) {
 		System.err.println(event.getEventType());
 		PurchaseRequest purchaseRequest = requestRepository.findById(event.getPrId()).orElseThrow(
 				() -> new PurchaseRequestNotFoundException("Purchase Request not found : " + event.getPrId()));
