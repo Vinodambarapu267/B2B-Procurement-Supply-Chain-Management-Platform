@@ -15,4 +15,8 @@ public class kafkaPurchaseOrderProducer {
 	public void handlePurchaseOrderGenerated(PurchaseRequestEvent event) {
 		kafkaTemplate.send("purchase-order-created", event.getPrId().toString(), event);
 	}
+
+	public void handlePurchaseOrderSent(PurchaseRequestEvent event) {
+		kafkaTemplate.send("purchase-order-sent", event.getPrId().toString(), event);
+	}
 }
