@@ -16,6 +16,7 @@ import com.vinod.b2b.exceptions.PurchaseOrderNotFoundException;
 import com.vinod.b2b.feignclient.SupplierServiceFeignClient;
 import com.vinod.b2b.feignclient.UserServiceFeignClient;
 import com.vinod.b2b.kafka.EventType;
+import com.vinod.b2b.kafka.PurchaseOrderEvent;
 import com.vinod.b2b.kafka.PurchaseRequestEvent;
 import com.vinod.b2b.kafka.kafkaPurchaseOrderProducer;
 import com.vinod.b2b.repository.PurchaseOrderRepository;
@@ -78,7 +79,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 		order.setSupplierId(supplier.getSupplierId());
 		PurchaseOrders save = repository.save(order);
 
-		PurchaseRequestEvent event = new PurchaseRequestEvent();
+		PurchaseOrderEvent event = new PurchaseOrderEvent();
 		event.setEventType(EventType.GENERATED);
 		event.setPrId(save.getPrId());
 		event.setStatus(OrderStatus.GENERATED);
@@ -127,11 +128,10 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 		order.setStatus(OrderStatus.PO_SENT);
 		PurchaseOrders save = repository.save(order);
 
-		PurchaseRequestEvent event = new PurchaseRequestEvent();
+		PurchaseOrderEvent event = new PurchaseOrderEvent();
 		event.setEventType(EventType.PO_SENT);
 		event.setPrId(save.getPrId());
 		event.setStatus(OrderStatus.PO_SENT);
-		event.setVersion(order.getVersion());
 		kafkaPurchaseOrderProducer.handlePurchaseOrderSent(event);
 		return save;
 	}
@@ -161,11 +161,13 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 
 		PurchaseOrders save = repository.save(order);
 
-		PurchaseRequestEvent event = new PurchaseRequestEvent();
-		event.setPrId(save.getPrId());
-		event.setStatus(OrderStatus.ACCEPTED);
+		PurchaseOrderEvent event = new PurchaseOrderEvent();
 		event.setEventType(EventType.ACCEPTED);
+		event.setItems(save.getItems());
+		event.setPurchaseOrderId(save.getPurchaseOrderId());
+		event.setPrId(save.getPrId());
 		kafkaPurchaseOrderProducer.handlePurchaseOrderAccept(event);
+
 		return save;
 	}
 
