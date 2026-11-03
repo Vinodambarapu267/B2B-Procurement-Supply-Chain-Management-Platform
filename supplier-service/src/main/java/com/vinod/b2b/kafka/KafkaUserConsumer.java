@@ -4,6 +4,7 @@ import org.springframework.kafka.annotation.KafkaListener;
 import org.springframework.stereotype.Service;
 
 import com.vinod.b2b.entity.Supplier;
+import com.vinod.b2b.exceptions.SupplierNotFoundException;
 import com.vinod.b2b.repository.SupplierRepository;
 
 @Service
@@ -17,20 +18,19 @@ public class KafkaUserConsumer {
 
 	@KafkaListener(topics = { "user-registered", "user-status-changed" }, groupId = "supplier-service-group")
 	public void handleUserConsumerEvent(UserEvent event) {
-		System.err.println("supplier event" + event);
 		if (event == null || event.getEventType() == null) {
 			throw new RuntimeException("UserEvent or Event type is null");
 		}
 		switch (event.getEventType()) {
 		case REGISTERED -> handleUserCreated(event);
-
+		case STATUS_CHANGE -> handleUserStatusChanged(event);
 		}
 	}
 
 	public void handleUserCreated(UserEvent event) {
-		  if (supplierRepository.existsById(event.getUserId())) {
-		        return; 
-		    }
+		if (supplierRepository.existsById(event.getUserId())) {
+			return;
+		}
 
 		supplierRepository.findBySupplierName(event.getUsername()).ifPresent(supplier -> {
 			throw new RuntimeException("User already exists with name");
@@ -41,6 +41,13 @@ public class KafkaUserConsumer {
 		supplier.setSupplierName(event.getUsername());
 		supplier.setIsActive(event.getIsActive());
 		supplier.setCategory("update the category");
+		supplierRepository.save(supplier);
+	}
+
+	public void handleUserStatusChanged(UserEvent event) {
+		Supplier supplier = supplierRepository.findById(event.getUserId())
+				.orElseThrow(() -> new SupplierNotFoundException("Supplier Not found ID :  " + event.getUserId()));
+		supplier.setIsActive(event.getIsActive());
 		supplierRepository.save(supplier);
 	}
 }
