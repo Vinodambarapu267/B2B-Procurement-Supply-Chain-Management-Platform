@@ -133,7 +133,7 @@ public class ProcurmentServiceImpl implements ProcurementService {
 
 		// cannnot cancel in terminal state
 		if (status == PurchaseStatus.APPROVED || status == PurchaseStatus.COMPLETED
-				|| status == PurchaseStatus.PO_GENERATED) {
+				|| status == PurchaseStatus.GENERATED) {
 
 			throw new IllegalStateException("You cannot cancel a purchase request in this status");
 		}
