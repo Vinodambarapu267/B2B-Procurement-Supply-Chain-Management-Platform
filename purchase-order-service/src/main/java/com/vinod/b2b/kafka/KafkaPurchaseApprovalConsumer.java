@@ -24,7 +24,7 @@ public class KafkaPurchaseApprovalConsumer {
 	@KafkaListener(topics = { "purchase-request-approved" }, groupId = "purchase-order-service-group")
 	public void handlePurchaseApprovalEvent(PurchaseRequestDecisionEvent event) {
 		if (event.getEventType().equals(EventType.APPROVED)) {
-			PurchaseOrders orders = orderRepository.findByPrIdAndStatus(event.getPrId(), OrderStatus.GENERATED).orElseThrow(()-> new PurchaseOrderNotFoundException("Purchase Order Already : "+OrderStatus.APPROVED));
+			PurchaseOrders orders = orderRepository.findByPrIdAndStatus(event.getPrId(), OrderStatus.CREATED).orElseThrow(()-> new PurchaseOrderNotFoundException("Purchase Order Already : "+OrderStatus.APPROVED));
 			orders.setPrId(event.getPrId());
 			orders.setStatus(OrderStatus.APPROVED);
 			orderRepository.save(orders);
