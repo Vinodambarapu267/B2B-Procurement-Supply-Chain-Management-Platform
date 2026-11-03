@@ -62,21 +62,20 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 		if (!has(permissions, "PURCHASE_ORDER_CREATE")) {
 			throw new AccessDeniedException("You don't have Pemission to create purchase orders");
 		}
-//		SupplierDto supplier = supplierServiceFeignClient.getSupplierByName(request.getSupplierName());
-//		if (supplier == null) {
-//			throw new RuntimeException("Supplier not found");
-//		}
-//		if (!supplier.getIsActive()) {
-//			throw new RuntimeException("Supplier account is deActive");
-//		}
+		SupplierDto supplier = supplierServiceFeignClient.getSupplierByName(request.getSupplierName());
+		if (supplier == null) {
+			throw new RuntimeException("Supplier not found");
+		}
+		if (!supplier.getIsActive()) {
+			throw new RuntimeException("Supplier account is deActive");
+		}
 
-		PurchaseOrders order = repository.findByPrIdAndStatus(request.getPrId(), OrderStatus.APPROVED)
-				.orElseThrow(() -> new PurchaseOrderNotFoundException(
-						"Purchase Order Already Generated : " +request.getPrId()));
+		PurchaseOrders order = repository.findByPrIdAndStatus(request.getPrId(), OrderStatus.APPROVED).orElseThrow(
+				() -> new PurchaseOrderNotFoundException("Purchase Order Already Generated : " + request.getPrId()));
 		System.out.println(order.getStatus());
 		order.setStatus(OrderStatus.GENERATED);
 		order.setVersion(order.getVersion() + 1);
-
+		order.setSupplierId(supplier.getSupplierId());
 		PurchaseOrders save = repository.save(order);
 
 		PurchaseRequestEvent event = new PurchaseRequestEvent();
@@ -125,8 +124,16 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 			throw new IllegalStateException(
 					"Only generated purchase orders can be sent. Current status: " + order.getStatus());
 		}
-		order.setStatus(OrderStatus.SENT);
-		return repository.save(order);
+		order.setStatus(OrderStatus.PO_SENT);
+		PurchaseOrders save = repository.save(order);
+
+		PurchaseRequestEvent event = new PurchaseRequestEvent();
+		event.setEventType(EventType.PO_SENT);
+		event.setPrId(save.getPrId());
+		event.setStatus(OrderStatus.PO_SENT);
+		event.setVersion(order.getVersion());
+		kafkaPurchaseOrderProducer.handlePurchaseOrderSent(event);
+		return save;
 	}
 
 	@Override
@@ -145,7 +152,7 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 			throw new IllegalArgumentException(
 					"You Already Accepted This purchase Order : " + order.getPurchaseOrderId());
 		}
-		if (order.getStatus().equals(OrderStatus.SENT)) {
+		if (order.getStatus().equals(OrderStatus.PO_SENT)) {
 			order.setStatus(OrderStatus.ACCEPTED);
 		} else {
 			throw new IllegalStateException(
