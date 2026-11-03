@@ -15,7 +15,6 @@ import lombok.Data;
 @Table(name = "suppliers")
 public class Supplier {
 	@Id
-	@GeneratedValue(strategy = GenerationType.UUID)
 	@Column(nullable = false)
 	private UUID supplierId;
 	@Column(nullable = false, length = 200)
