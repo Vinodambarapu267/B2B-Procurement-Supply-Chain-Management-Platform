@@ -158,7 +158,15 @@ public class PurchaseOrderServiceImpl implements PurchaseOrderService {
 			throw new IllegalStateException(
 					"Only SENT purchase orders can be accepted. Current status: " + order.getStatus());
 		}
-		return repository.save(order);
+
+		PurchaseOrders save = repository.save(order);
+
+		PurchaseRequestEvent event = new PurchaseRequestEvent();
+		event.setPrId(save.getPrId());
+		event.setStatus(OrderStatus.ACCEPTED);
+		event.setEventType(EventType.ACCEPTED);
+		kafkaPurchaseOrderProducer.handlePurchaseOrderAccept(event);
+		return save;
 	}
 
 	@Override
