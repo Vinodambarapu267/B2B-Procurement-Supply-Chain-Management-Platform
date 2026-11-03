@@ -1,5 +1,5 @@
 package com.example.demo.kafka;
 
 public enum EventType {
-	CREATED, APPROVED, REJECTED, CANCELLED,GENERATED
+	CREATED, APPROVED, REJECTED, CANCELLED,GENERATED,PO_SENT
 }
